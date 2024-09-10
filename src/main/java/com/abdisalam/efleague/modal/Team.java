@@ -2,6 +2,8 @@ package com.abdisalam.efleague.modal;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ public class Team {
     private Long id;
 
 
+    @NotNull(message = "Team name cannot be null")
+    @Size(min = 2, max = 50, message = "Team name must be between 2 and 50.")
     private String name;
 
     @ManyToOne
