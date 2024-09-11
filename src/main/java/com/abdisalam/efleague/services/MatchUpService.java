@@ -89,7 +89,7 @@ public class MatchUpService {
                 //Schedule first round matchups (home vs away)
                 matchups.add(createMatchup(homeTeam, awayTeam, startDate.plusDays(matchups.size())));
 
-                //double round robin matchups (away vs home)
+                //double round-robin matchups (away vs home)
                 matchups.add(createMatchup(awayTeam, homeTeam, startDate.plusDays(matchups.size())));
             }
         }
@@ -111,8 +111,6 @@ public class MatchUpService {
         matchup.setAwayTeam(awayTeam);
         matchup.setGameDateTime(gameDateTime);
         return matchup;
-
-
     }
 
 
