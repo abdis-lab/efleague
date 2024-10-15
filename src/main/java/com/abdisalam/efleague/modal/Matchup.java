@@ -37,4 +37,18 @@ public class Matchup {
     private Integer awayTeamScore;
 
 
+    @ManyToOne
+    @JoinColumn(name = "season_id")
+    private Season season;
+
+
+    @Enumerated(EnumType.STRING)
+    private GameResult result;
+
+
+    public enum GameResult{
+        HOME_TEAM_WIN, AWAY_TEAM_WIN
+    }
+
+
 }

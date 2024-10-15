@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -29,8 +30,31 @@ public class Team {
     @JoinColumn(name = "captain_id")
     private User captain;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
-    private List<Player> players;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "team_id")
+    private List<User> userPlayers;
+
+
+    public void addPlayer(User userPlayer){
+        if(this.userPlayers.size() < 10){
+            this.userPlayers.add(userPlayer);
+        }else{
+            throw new IllegalStateException("Team cannot have more than 10 players");
+        }
+    }
+
+
+    private int wins = 0;
+    private int losses = 0;
+
+
+    public void incrementWins(){
+        this.wins++;
+    }
+
+    public void incrementLosses(){
+        this.losses++;
+    }
 
 
 }

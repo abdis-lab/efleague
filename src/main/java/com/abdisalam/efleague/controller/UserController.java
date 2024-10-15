@@ -5,12 +5,14 @@ import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Controller
 @RequestMapping("/users")
 public class UserController {
 
@@ -22,9 +24,10 @@ public class UserController {
     }
 
 
-    @GetMapping
-    public List<User> getAllUsers(){
-        return userService.getAllUsers();
+    @GetMapping("/register")
+    public String getAllUsers(Model model){
+        model.addAttribute("user", new User());
+        return "user-create";
     }
 
 
@@ -35,12 +38,21 @@ public class UserController {
     }
 
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
-        User savedUser = userService.saveUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    @PostMapping("/assign-to-team")
+    public ResponseEntity<String> assignPlayerToTeam(@RequestParam Long playerId,@RequestParam Long teamId){
+        userService.assignPlayerToTeam(playerId, teamId);
+        return new ResponseEntity<>("Player assigned to team", HttpStatus.OK);
     }
 
+    @PostMapping("/register")
+    public String registerUser(
+            @ModelAttribute("user") User user,
+            Model model
+    ){
+        userService.saveUser(user);
+        model.addAttribute("message", "User registered Successfully");
+        return "schedule-games";
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails){

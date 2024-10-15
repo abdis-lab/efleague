@@ -31,9 +31,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+
     public enum Role{
         ADMIN,
-        CAPTAIN
+        CAPTAIN,
+        PLAYER
     }
 
 }

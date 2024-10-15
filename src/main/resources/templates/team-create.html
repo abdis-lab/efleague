@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="/css/style.css" rel="stylesheet">
+    <title>Create Team</title>
+</head>
+<body>
+<h1 class="text-blue-500">Create a New Team</h1>
+
+<form th:action="@{/teams/create}" th:object="${team}" method="post">
+    <label for="teamName">Team Name:</label>
+    <input type="text" id="teamName" th:field="*{name}" required><br>
+
+    <label for="captainId">Captain ID:</label>
+    <input type="number" id="captainId" th:field="*{captain.id}" required><br>
+
+    <input type="submit" value="Create Team">
+</form>
+
+<div th:if="${message}">
+    <p th:text="${message}"></p>
+</div>
+</body>
+</html>
