@@ -6,6 +6,10 @@ import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.repositories.PlayerRepository;
 import com.abdisalam.efleague.repositories.TeamRepository;
 import com.abdisalam.efleague.repositories.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +22,18 @@ public class UserService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
 
-    public UserService(UserRepository userRepository,PlayerRepository playerRepository, TeamRepository teamRepository){
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder, PlayerRepository playerRepository, TeamRepository teamRepository){
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.playerRepository = playerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    // Override method to load users by username for authentication
     public User saveUser(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -39,12 +48,19 @@ public class UserService {
             Team team = teamOpt.get();
 
             //Only allow assignment if the user is a PLAYER (not a captain)
-            if(user.getRole() == User.Role.PLAYER){
-                team.getUserPlayers().add(user);
-                teamRepository.save(team);
-            }else{
-                throw new IllegalStateException("Captains cannot be added");
+            if(user.getRole() == User.Role.CAPTAIN) {
+                if (team.getCaptain() != null) {
+                    throw new IllegalStateException("Each team can only have one captain.");
+                }
+                team.setCaptain(user);
+
             }
+
+            // Add the user to the team's players list (both captains and players go here)
+                user.setTeam(team); // Associate user with the team
+                team.getUserPlayers().add(user); // Add user to the team's players list
+                teamRepository.save(team); // Save the team
+
         }else {
             throw new IllegalStateException("User or Team not Found");
         }
@@ -66,6 +82,5 @@ public class UserService {
     public void deleteUserById(Long id){
         userRepository.deleteById(id);
     }
-
 
 }

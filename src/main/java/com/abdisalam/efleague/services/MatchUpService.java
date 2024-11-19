@@ -1,4 +1,5 @@
 package com.abdisalam.efleague.services;
+import java.util.logging.Logger;
 
 import com.abdisalam.efleague.modal.Matchup;
 import com.abdisalam.efleague.modal.Season;
@@ -20,6 +21,8 @@ public class MatchUpService {
 
     private final MatchUpRepository matchUpRepository;
     private final TeamRepository teamRepository;
+
+    private static final Logger logger = Logger.getLogger(MatchUpService.class.getName());
 
     public MatchUpService(MatchUpRepository matchUpRepository, TeamRepository teamRepository){
         this.matchUpRepository = matchUpRepository;
@@ -99,10 +102,11 @@ public class MatchUpService {
         LocalDateTime nextSaturday = getNextSaturday(startDate);
 
         int numTeams = teams.size();
+        //Limit each team to 8 games
         int gamesPerTeam = 8;
 
 
-        //Make sure there is at least 2 teams
+        //Make sure there is at least 2 teams and it dosnt exceed 12
         if(numTeams > 12){
             throw new IllegalStateException("Maximum number of teams allowed is 12.");
         }
@@ -111,6 +115,8 @@ public class MatchUpService {
         //Generate matchups with a limit of 8 games per team
         int[] gamesPlayed = new int[numTeams];
 
+        logger.info("Starting Round Robin Scheduling...");
+
 
         //Scheduling each team against every other team
         for(int i = 0; i < numTeams - 1; i++){
@@ -118,6 +124,8 @@ public class MatchUpService {
                 if(gamesPlayed[i] < gamesPerTeam && gamesPlayed[j] < gamesPerTeam){
                     Team homeTeam = teams.get(i);
                     Team awayTeam = teams.get(j);
+
+                    logger.info("Scheduling matchup between " + homeTeam.getName() + " and " + awayTeam.getName());
 
 
                     //Schedule first round matchups (home vs away)
@@ -129,6 +137,7 @@ public class MatchUpService {
                     gamesPlayed[j]++;
 
                     if(gamesPlayed[i] == gamesPerTeam || gamesPlayed[j] == gamesPerTeam){
+                        logger.info("Team " + homeTeam.getName() + " or " + awayTeam.getName() + " has reached the game limit");
                         break;
                     }
 
@@ -142,6 +151,7 @@ public class MatchUpService {
             }
         }
 
+        logger.info("Total matchups created: " + matchups.size());
         return matchUpRepository.saveAll(matchups);
     }
 

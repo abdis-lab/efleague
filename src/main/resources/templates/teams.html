@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teams Managment</title>
+</head>
+<body>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Teams</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-5">
+    <h1 class="text-3xl font-bold mb-5">Team List</h1>
+
+    <table class="table-auto w-full mb-5 bg-white shadow-md rounded-lg">
+        <thead>
+        <tr>
+            <th class="px-4 py-2">Team Name</th>
+            <th class="px-4 py-2">Captain</th>
+            <th class="px-4 py-2">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Loop through the teams list -->
+        <tr th:each="team : ${teams}">
+            <td class="border px-4 py-2" th:text="${team.name}">Team Name</td>
+            <td class="border px-4 py-2" th:text="${team.captain.username}">Captain Name</td>
+            <td class="border px-4 py-2">
+                <a th:href="@{/teams/{id}/edit(id=${team.id})}" class="bg-blue-500 text-white px-3 py-1 rounded">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a href="/teams/create" class="bg-green-500 text-white px-4 py-2 rounded">Create New Team</a>
+</div>
+
+</body>
+</html>
+</body>
+</html>

@@ -2,9 +2,11 @@ package com.abdisalam.efleague.controller;
 
 
 import com.abdisalam.efleague.modal.User;
+import com.abdisalam.efleague.services.TeamService;
 import com.abdisalam.efleague.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +19,59 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final TeamService teamService;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public UserController(UserService userService){
+
+    public UserController(TeamService teamService, UserService userService, PasswordEncoder passwordEncoder){
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.teamService = teamService;
     }
 
 
-    @GetMapping("/register")
+    @GetMapping("/signup")
     public String getAllUsers(Model model){
         model.addAttribute("user", new User());
-        return "user-create";
+        return "signUp";
     }
+
+
+    @PostMapping("/signup")
+    public String registerUser(
+            @ModelAttribute("user") User user,
+            @RequestParam String role,
+            @RequestParam(required = false) String teamPreference,
+            Model model
+    ){
+        //Encode the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(User.Role.valueOf(role));
+
+        //Set the team preference
+        if(teamPreference != null && !teamPreference.trim().isEmpty()){
+            user.setTeamPreference(teamPreference);
+        }
+
+
+        try{
+            userService.saveUser(user);
+            return "redirect:/users/login";
+        }catch (Exception e){
+            model.addAttribute("error", "An error Accured while saving user");
+        }
+
+        return "signUp";
+    }
+
+
+    @GetMapping("/login")
+    public String login(){
+        return "login";
+    }
+
+
 
 
     @GetMapping("/{id}")

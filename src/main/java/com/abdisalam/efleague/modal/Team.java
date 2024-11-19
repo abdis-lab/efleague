@@ -32,7 +32,7 @@ public class Team {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "team_id")
-    private List<User> userPlayers;
+    private List<User> userPlayers = new ArrayList<>();
 
 
     public void addPlayer(User userPlayer){

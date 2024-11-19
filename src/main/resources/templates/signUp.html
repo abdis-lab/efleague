@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-50">
+
+<div class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 space-y-6">
+        <h1 class="text-2xl font-semibold text-gray-800 text-center">Sign Up</h1>
+        <form th:action="@{/users/signup}" method="post" th:object="${user}" class="space-y-4">
+
+            <!-- Username input -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="username" th:field="*{username}" name="username" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your username" required>
+            </div>
+
+            <!-- Password input -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" th:field="*{password}" name="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your password" required>
+            </div>
+
+            <!-- Role select dropdown -->
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                <select id="role" th:field="*{role}" name="role" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="PLAYER">Player</option>
+                    <option value="CAPTAIN">Captain</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="teamPreference" class="block text-gray-700 text-sm font-bold mb-2">Team Preference or Free Agent Status:</label>
+                <textarea id="teamPreference" name="teamPreference" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" placeholder="Describe your preferred team or indicate if you are a free agent."></textarea>
+            </div>
+
+
+            <!-- Sign Up button -->
+            <div class="flex justify-center">
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none">
+                    Sign Up
+                </button>
+            </div>
+
+            <!-- Additional links (optional) -->
+            <div class="text-center">
+                <p class="text-sm text-gray-500">Already have an account? <a href="/users/login" class="text-blue-600 hover:underline">Log in</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
+</body>
+</html>

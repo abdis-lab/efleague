@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,7 +24,7 @@ public class Season {
     private boolean active;
 
     @OneToMany(mappedBy = "season", cascade = CascadeType.ALL)
-    private List<Matchup> matchups;
+    private List<Matchup> matchups = new ArrayList<>();
 
 
 }

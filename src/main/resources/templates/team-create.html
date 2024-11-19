@@ -6,20 +6,45 @@
     <title>Create Team</title>
 </head>
 <body>
-<h1 class="text-blue-500">Create a New Team</h1>
+<div class="container mx-auto p-5">
+    <!-- Page Heading -->
+    <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Create a New Team</h1>
 
-<form th:action="@{/teams/create}" th:object="${team}" method="post">
-    <label for="teamName">Team Name:</label>
-    <input type="text" id="teamName" th:field="*{name}" required><br>
+    <!-- Form to create a new team -->
+    <form action="/teams/create" method="post" class="bg-white p-8 shadow-xl rounded-lg max-w-2xl mx-auto">
+        <!-- Team Name Field -->
+        <div class="mb-6">
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Team Name</label>
+            <input type="text" id="name" name="name" th:value="${team.name}" class="block w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Enter team name" required>
+            <p class="mt-2 text-sm text-gray-500">Choose a unique team name.</p>
+        </div>
 
-    <label for="captainId">Captain ID:</label>
-    <input type="number" id="captainId" th:field="*{captain.id}" required><br>
+        <!-- Captain Selection Field -->
+        <div class="mb-6">
+            <label for="captain" class="block mb-2 text-sm font-medium text-gray-900">Select Captain</label>
+            <select id="captain" name="captain.id" class="block w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <!-- Loop through all users and display them as captain options -->
+                <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}">Select a captain</option>
+            </select>
+            <p class="mt-2 text-sm text-gray-500">Choose the team captain from the list.</p>
+        </div>
 
-    <input type="submit" value="Create Team">
-</form>
+        <!-- Error Handling (if any) -->
+        <div th:if="${error}" class="mb-4">
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                <p th:text="${error}"></p>
+            </div>
+        </div>
 
-<div th:if="${message}">
-    <p th:text="${message}"></p>
+        <!-- Submit Button -->
+        <div class="flex justify-center">
+            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-lg">
+                Create Team
+            </button>
+        </div>
+    </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flowbite@1.4.7/dist/flowbite.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit team</title>
+</head>
+<body>
+<div class="container mx-auto p-5">
+    <!-- Page Heading -->
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">Edit Team: <span th:text="${team.name}"></span></h1>
+
+    <!-- Form to update the team name -->
+    <form action="/teams/${team.id}/update" method="post" class="bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto">
+        <!-- Team Name Field -->
+        <div class="mb-5">
+            <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Team Name:</label>
+            <input type="text" id="name" name="name" th:value="${team.name}" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter team name" required>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex items-center justify-center">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300" type="submit">
+                Update Team
+            </button>
+        </div>
+    </form>
+
+    <!-- Manage Players Section -->
+    <div class="mt-10">
+        <h2 class="text-3xl font-bold text-gray-800 mb-5">Manage Players</h2>
+
+        <!-- Player List Table -->
+        <div class="overflow-x-auto shadow-md rounded-lg bg-white">
+            <table class="table-auto w-full text-left">
+                <thead class="bg-gray-200 text-gray-600">
+                <tr>
+                    <th class="px-6 py-4">Player Name</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                <!-- Loop through the players list -->
+                <tr th:each="player : ${team.players}" class="border-t">
+                    <td class="px-6 py-4" th:text="${player.username}">Player Name</td>
+                    <td class="px-6 py-4 text-right">
+                        <form th:action="@{/teams/{id}/removePlayer(id=${team.id})}" method="post">
+                            <input type="hidden" name="playerId" th:value="${player.id}">
+                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-300">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Player Section -->
+    <div class="mt-10">
+        <h2 class="text-3xl font-bold text-gray-800 mb-5">Add Player to Team</h2>
+
+        <form action="/teams/${team.id}/addPlayer" method="post" class="bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto">
+            <!-- Player Selection Field -->
+            <div class="mb-5">
+                <label for="playerId" class="block text-gray-700 text-sm font-semibold mb-2">Select Player:</label>
+                <select id="playerId" name="playerId" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <!-- Loop through all users and display them as player options -->
+                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}">Select a Player</option>
+                </select>
+            </div>
+
+            <!-- Add Player Button -->
+            <div class="flex items-center justify-center">
+                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                    Add Player
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

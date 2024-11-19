@@ -41,6 +41,42 @@ public class TeamService {
     }
 
 
+    public Team updateTeam(Long teamId, String newName){
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+
+        if(teamOptional.isPresent()){
+            Team team = teamOptional.get();
+            team.setName(newName);// Update team name
+            return teamRepository.save(team);// Save the updated team
+        }else {
+            throw new IllegalStateException("Team Not Found");
+        }
+    }
+
+    public Team removePlayerFromTeam(Long teamId, Long playerId){
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+        Optional<User> userOptional = userRepository.findById(playerId);
+
+
+        if(teamOptional.isPresent() && userOptional.isPresent()){
+
+            Team team = teamOptional.get();
+            User user = userOptional.get();
+
+            //Make sure the player is on the team before removing
+            if(team.getUserPlayers().contains(user)){
+                team.getUserPlayers().remove(user);
+                return teamRepository.save(team);
+            }else {
+                throw new IllegalStateException("Player is not on the team.");
+            }
+
+        }else {
+            throw new IllegalStateException("Team or Player not Found.");
+        }
+    }
+
+
     //Find a team by ID
     public Optional<Team> findTeamById(Long id){
         return teamRepository.findById(id);
