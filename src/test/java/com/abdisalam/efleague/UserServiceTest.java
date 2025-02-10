@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -26,14 +27,17 @@ public class UserServiceTest {
     @Mock
     private TeamRepository teamRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserService userService;
     @InjectMocks
     private TeamService teamService;
 
-    @BeforeEach
+    @BeforeEach  
     void setUp(){
-        MockitoAnnotations.openMocks(this);
+        userService = new UserService(userRepository, passwordEncoder, null , null);
     }
 
 
@@ -44,6 +48,9 @@ public class UserServiceTest {
         captain.setUsername("Captain123");
         captain.setPassword("password123");
         captain.setRole(User.Role.CAPTAIN);
+
+
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
 
 
         //Mock the repository save method to return the user when saved

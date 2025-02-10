@@ -50,5 +50,10 @@ public class Matchup {
         HOME_TEAM_WIN, AWAY_TEAM_WIN
     }
 
+    @PostLoad
+    private void calculateResult(){
+        if(homeTeamScore == null || awayTeamScore == null) return;
+        this.result = (homeTeamScore > awayTeamScore) ? GameResult.HOME_TEAM_WIN : GameResult.AWAY_TEAM_WIN;
+    }
 
 }

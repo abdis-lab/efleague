@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private Team team;
 
 
-    // Team prefrence field
+    // Team preference field
     private String teamPreference;
 
 
@@ -69,9 +69,11 @@ public class User implements UserDetails {
         return true;
     }
 
+
     public enum Role {
         ADMIN,
         CAPTAIN,
-        PLAYER
+        PLAYER,
+        USER
     }
 }

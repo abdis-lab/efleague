@@ -2,6 +2,8 @@ package com.abdisalam.efleague.modal;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,7 +29,8 @@ public class Player {
     private String lastName;
 
     @NotNull(message = "Age cannot be null")
-    @Size(min = 18, max = 99, message = "Age must be 18 and Up")
+    @Min(value = 18, message = "Age must be at least 18")
+    @Max(value = 99, message = "Age cannot exceed 99")
     private int age;
 
     @ManyToOne

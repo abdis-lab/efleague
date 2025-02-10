@@ -46,7 +46,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
 
-                        .loginPage("/login")//Custom login Page
+                        .loginPage("/users/login")//Custom login Page
                         .defaultSuccessUrl("/landingPage", true)
                         .permitAll()
                 )
@@ -55,10 +55,10 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")//Redirect to login page after logout
                         .permitAll()
-                )
-                .csrf(csrf -> csrf
-                        .disable()
-                );//Disable CSRF for now (Enable later for added security)
+                );
+//                .csrf(csrf -> csrf
+//                        .disable()
+                //Disable CSRF for now (Enable later for added security)
         return httpSecurity.build();
     }
 

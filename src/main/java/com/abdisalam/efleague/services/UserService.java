@@ -6,6 +6,7 @@ import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.repositories.PlayerRepository;
 import com.abdisalam.efleague.repositories.TeamRepository;
 import com.abdisalam.efleague.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,6 +33,7 @@ public class UserService {
     }
 
     // Override method to load users by username for authentication
+    @Transactional
     public User saveUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -49,8 +51,10 @@ public class UserService {
 
             //Only allow assignment if the user is a PLAYER (not a captain)
             if(user.getRole() == User.Role.CAPTAIN) {
-                if (team.getCaptain() != null) {
-                    throw new IllegalStateException("Each team can only have one captain.");
+                //Ensure the captain isn't already assigned to another team
+                Optional<Team> existingTeam = teamRepository.findByCaptain(user);
+                if (existingTeam.isPresent()) {
+                    throw new IllegalStateException("User is already a captain of another team.");
                 }
                 team.setCaptain(user);
 
@@ -68,6 +72,9 @@ public class UserService {
 
     }
 
+    public Optional<User> findByUsername(String username){
+        return userRepository.findByUsername(username);
+    }
 
     public Optional<User> findUserById(Long id){
         return userRepository.findById(id);

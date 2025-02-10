@@ -58,6 +58,7 @@ public class TeamService {
         Optional<User> userOptional = userRepository.findById(playerId);
 
 
+
         if(teamOptional.isPresent() && userOptional.isPresent()){
 
             Team team = teamOptional.get();
@@ -65,7 +66,10 @@ public class TeamService {
 
             //Make sure the player is on the team before removing
             if(team.getUserPlayers().contains(user)){
+                user.setTeam(null);
                 team.getUserPlayers().remove(user);
+                teamRepository.save(team);
+                userRepository.save(user);
                 return teamRepository.save(team);
             }else {
                 throw new IllegalStateException("Player is not on the team.");
