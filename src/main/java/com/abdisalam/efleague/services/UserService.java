@@ -50,7 +50,7 @@ public class UserService {
             Team team = teamOpt.get();
 
             //Only allow assignment if the user is a PLAYER (not a captain)
-            if(user.getRole() == User.Role.CAPTAIN) {
+            if(user.getRole() == User.Role.ROLE_CAPTAIN) {
                 //Ensure the captain isn't already assigned to another team
                 Optional<Team> existingTeam = teamRepository.findByCaptain(user);
                 if (existingTeam.isPresent()) {

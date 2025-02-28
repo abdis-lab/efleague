@@ -14,6 +14,7 @@ package com.abdisalam.efleague.controller;
 import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,7 +39,7 @@ public class UserWebController {
     @GetMapping("/signup")
     public String showSignupForm(Model model) {
         model.addAttribute("user", new User());
-        return "signup";
+        return "signUp";
     }
 
     // Process registration
@@ -51,7 +52,7 @@ public class UserWebController {
             RedirectAttributes redirectAttributes
     ) {
         if(result.hasErrors()){
-            return "signup";
+            return "signUp";
         }
 
         //Validate Role input
@@ -73,9 +74,6 @@ public class UserWebController {
             return "redirect:/users/signup";
         }
 
-        // Encode password and set default role
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.saveUser(user); // Enforce default role
 
         userService.saveUser(user);
         redirectAttributes.addFlashAttribute("message", "Registration successful!");
@@ -83,7 +81,7 @@ public class UserWebController {
     }
     //Define allowed roles for registration
     private boolean isAllowedRole(User.Role role){
-        return role == User.Role.USER || role == User.Role.PLAYER;
+        return role == User.Role.ROLE_USER || role == User.Role.ROLE_PLAYER || role == User.Role.ROLE_CAPTAIN;
     }
 
     // Show login page
@@ -91,6 +89,107 @@ public class UserWebController {
     public String showLoginForm() {
         return "login";
     }
+
+
+    @GetMapping("/landingPage")
+    public String landingPage(@RequestParam(required = false) String view, Model model, Authentication authentication){
+        if(authentication != null && authentication.isAuthenticated()){
+            model.addAttribute("isAuthenticated", true);
+            model.addAttribute("username", authentication.getName());
+        }else {
+            model.addAttribute("isAuthenticated", false);
+        }
+
+        return "landingPage";
+    }
+
+
+    @GetMapping("/profile")
+    public String profilePage(Model model, Authentication authentication){
+        if(authentication != null && authentication.isAuthenticated()){
+            model.addAttribute("isAuthenticated", true);
+            model.addAttribute("username", authentication.getName());
+        }else {
+            model.addAttribute("isAuthenticated", true);
+        }
+
+        return "profileView";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //    private final UserService userService;
 //    private final TeamService teamService;

@@ -1,6 +1,6 @@
 package com.abdisalam.efleague;
 
-import com.abdisalam.efleague.services.UserAuthService;
+import com.abdisalam.efleague.UserAuthService;
 import com.abdisalam.efleague.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
@@ -51,22 +52,16 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")//Redirect to login page after logout
+                        .logoutSuccessUrl("/users/login?logout")//Redirect to login page after logout
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
-//                .csrf(csrf -> csrf
-//                        .disable()
                 //Disable CSRF for now (Enable later for added security)
         return httpSecurity.build();
     }
 
-
-    @Bean
-    public UserDetailsService userDetailsService(){
-        return userAuthService;
-    }
 
 
 

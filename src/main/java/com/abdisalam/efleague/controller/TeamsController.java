@@ -1,6 +1,7 @@
 package com.abdisalam.efleague.controller;
 
 import com.abdisalam.efleague.modal.Team;
+import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.services.TeamService;
 import com.abdisalam.efleague.services.UserService;
 import jakarta.validation.Valid;
@@ -98,9 +99,22 @@ public class TeamsController {
 //
 
     @PostMapping("/create")
-    public String createTeam(@ModelAttribute("team") Team team, Model model){
+    public String createTeam(@ModelAttribute("team") Team team,@RequestParam Long captainId, Model model){
         try{
+            Optional<User> captainOpt = userService.findUserById(captainId);
+            if(captainOpt.isEmpty()){
+                throw new IllegalStateException("Captain not found!");
+            }
+
+            User captain = captainOpt.get();
+
+            if(captain.getRole() != User.Role.ROLE_CAPTAIN){
+                throw new IllegalStateException("ONly captains can create teams.");
+            }
+            team.setCaptain(captain);
+            team.setStatus(Team.Status.PENDING);
             teamService.saveTeam(team);
+
             return "redirect:/teams";
         }catch(IllegalStateException e){
             model.addAttribute("error", e.getMessage());
@@ -147,4 +161,33 @@ public class TeamsController {
         return ResponseEntity.noContent().build();
     }
 
+
+
+
+    @GetMapping("/pending")
+    public String getPendingTeams(Model model){
+        model.addAttribute("pendingTeams", teamService.getPendingTeams());
+        return "team-approval";
+    }
+
+
+    @PostMapping("/{teamId}/approve")
+    public String approveTeam(@PathVariable Long teamId){
+        teamService.approveTeam(teamId);
+        return "redirect:/teams/pending";
+    }
+
+
+    @PostMapping("/{teamId}/reject")
+    public String rejectTeam(@PathVariable Long teamId){
+        teamService.rejectTeam(teamId);
+        return "redirect:/teams/pending";
+    }
+
+
+
+
 }
+
+
+

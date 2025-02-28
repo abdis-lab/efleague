@@ -1,4 +1,4 @@
-package com.abdisalam.efleague.services;
+package com.abdisalam.efleague;
 
 import com.abdisalam.efleague.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

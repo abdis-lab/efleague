@@ -14,6 +14,13 @@
         <h1 class="text-2xl font-semibold text-gray-800 text-center">Sign Up</h1>
         <form th:action="@{/users/signup}" method="post" th:object="${user}" class="space-y-4">
 
+            <div th:if="${#fields.hasErrors('*')}" class="text-red-500">
+                Please fix the errors below.
+            </div>
+            <div th:each="err : ${#fields.detailedErrors()}" class="text-red-500">
+                <span th:text="${err.message}"></span>
+            </div>
+
             <!-- Username input -->
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
@@ -30,9 +37,9 @@
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
                 <select id="role" th:field="*{role}" name="role" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="PLAYER">Player</option>
-                    <option value="CAPTAIN">Captain</option>
-                    <option value="USER">Other</option>
+                    <option value="ROLE_PLAYER">Player</option>
+                    <option value="ROLE_CAPTAIN">Captain</option>
+                    <option value="ROLE_USER">Other</option>
                 </select>
             </div>
 

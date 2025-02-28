@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Approval</title>
+</head>
+<body>
+<h2>Pending Team Approvals</h2>
+
+<table>
+    <tr>
+        <th>Team Name</th>
+        <th>Captain</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="team : ${pendingTeams}">
+        <td th:text="${team.name}"></td>
+        <td th:text="${team.captain.username}"></td>
+        <td>
+            <form th:action="@{/teams/{teamId}/approve(teamId=${team.id})}" method="post">
+                <button type="submit">Approve</button>
+            </form>
+            <form th:action="@{/teams/{teamId}/reject(teamId=${team.id})}" method="post">
+                <button type="submit">Reject</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<a href="/landingPage">Back to Dashboard</a>
+</body>
+</html>

@@ -71,9 +71,9 @@ public class User implements UserDetails {
 
 
     public enum Role {
-        ADMIN,
-        CAPTAIN,
-        PLAYER,
-        USER
+        ROLE_ADMIN,
+        ROLE_CAPTAIN,
+        ROLE_PLAYER,
+        ROLE_USER
     }
 }

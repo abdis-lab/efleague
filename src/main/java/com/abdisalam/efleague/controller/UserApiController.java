@@ -35,7 +35,7 @@ public class UserApiController {
 
         // Encode password and assign default role
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(User.Role.USER); // Default role
+        user.setRole(User.Role.ROLE_USER); // Default role
 
         User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);

@@ -35,9 +35,19 @@ public class Team {
     private List<User> userPlayers = new ArrayList<>();
 
 
+    public enum Status {
+        PENDING, APPROVED, REJECTED
+    }
+
+
+
+    private Status status = Status.PENDING;
+
+
     public void addPlayer(User userPlayer){
         if(this.userPlayers.size() < 10){
             this.userPlayers.add(userPlayer);
+            userPlayer.setTeam(this);
         }else{
             throw new IllegalStateException("Team cannot have more than 10 players");
         }
