@@ -18,6 +18,7 @@ public class TeamService {
     private final UserRepository userRepository;
 
     private static final int MAX_TEAMS = 12;
+    private static final int MAX_PLAYERS_PER_TEAM = 10;
 
     public TeamService(TeamRepository teamRepository, UserRepository userRepository){
         this.teamRepository = teamRepository;
@@ -48,14 +49,6 @@ public class TeamService {
     }
 
 
-//    public Team approveTeam(Long teamId){
-//        Team team = teamRepository.findById(teamId).orElseThrow(() -> new IllegalStateException("Team not found!"));
-//
-//        team.setStatus(Team.Status.APPROVED);
-//        return teamRepository.save(team);
-//    }
-
-
     public Team updateTeam(Long teamId, String newName){
         Optional<Team> teamOptional = teamRepository.findById(teamId);
 
@@ -67,6 +60,50 @@ public class TeamService {
             throw new IllegalStateException("Team Not Found");
         }
     }
+
+    public Team assignPlayerToTeam(Long teamId, Long playerId){
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+        Optional<User> userOptional = userRepository.findById(playerId);
+
+
+        if(teamOptional.isEmpty() || userOptional.isEmpty()){
+            throw new IllegalStateException("Team or player not found!");
+        }
+
+
+        Team team = teamOptional.get();
+        User player = userOptional.get();
+
+
+        //Ensure the team APPROVED before assigning players
+        if(team.getStatus() != Team.Status.APPROVED){
+            throw new IllegalStateException("Cannot assign player to a pending team.");
+        }
+
+        // Ensure the team is not already full
+        if(team.getUserPlayers().size() >= MAX_PLAYERS_PER_TEAM){
+            throw new IllegalStateException("Team is already full. Max players: " + MAX_PLAYERS_PER_TEAM);
+        }
+
+
+        //ENsure the player is not already assigned to anther team
+        if(player.getTeam() != null){
+            throw new IllegalStateException("Player is already assigned to a team");
+        }
+
+
+        //Add player to the team
+        team.getUserPlayers().add(player);
+        player.setTeam(team);
+
+
+        userRepository.save(player);
+        return teamRepository.save(team);
+
+    }
+
+
+
 
     public Team removePlayerFromTeam(Long teamId, Long playerId){
         Optional<Team> teamOptional = teamRepository.findById(teamId);
@@ -184,7 +221,27 @@ public class TeamService {
 
     //Delete a Team by ID
     public void deleteTeamById(Long id){
-        teamRepository.deleteById(id);
+        Optional<Team> teamOptional = teamRepository.findById(id);
+
+
+        if(teamOptional.isPresent()){
+            Team team = teamOptional.get();
+
+
+            //Remove all player association before deleting
+            for(User player : team.getUserPlayers()){
+                player.setTeam(null);
+                userRepository.save(player);
+            }
+
+            team.getUserPlayers().clear();//clear team refrence
+            teamRepository.save(team);//save the changes before deletion
+
+            teamRepository.deleteById(id);
+        }else {
+            throw new IllegalStateException("Team not found.");
+        }
+
     }
 
 

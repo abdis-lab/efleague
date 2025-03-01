@@ -30,7 +30,7 @@ public class Team {
     @JoinColumn(name = "captain_id")
     private User captain;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team",fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     //@JoinColumn(name = "team_id")
     private List<User> userPlayers = new ArrayList<>();
 

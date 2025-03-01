@@ -4,188 +4,146 @@ import com.abdisalam.efleague.modal.Team;
 import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.services.TeamService;
 import com.abdisalam.efleague.services.UserService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/teams")
 public class TeamsController {
 
-
     private final TeamService teamService;
     private final UserService userService;
 
-    public TeamsController(TeamService teamService, UserService userService){
-        this.teamService = teamService; this.userService = userService;
+    public TeamsController(TeamService teamService, UserService userService) {
+        this.teamService = teamService;
+        this.userService = userService;
     }
 
-
     @GetMapping
-    public String getAllTeams(Model model){
+    public String getAllTeams(Model model) {
         model.addAttribute("teams", teamService.getAllTeams());
         return "teams";
     }
 
     @GetMapping("/create")
-    public String showCreateTeamForm(Model model){
+    @PreAuthorize("hasRole('ADMIN')")
+    public String showCreateTeamForm(Model model) {
         model.addAttribute("team", new Team());
         model.addAttribute("users", userService.getAllUsers());
         return "team-create";
     }
 
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeamById(@PathVariable Long id){
-        Optional<Team> team = teamService.findTeamById(id);
-        return team.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{teamId}/edit")
-    public String showEditTeamForm(@PathVariable Long teamId, Model model){
-        Optional<Team> teamOpt = teamService.findTeamById(teamId);
-        if(teamOpt.isPresent()){
-            model.addAttribute("team", teamOpt.get());
-            model.addAttribute("users", userService.getAllUsers());
-            return "team-edit";//Return the 'team-edit.html template
-        }else {
-            model.addAttribute("error", "Team not found");
-            return "error";
-        }
-    }
-
-
-    //Update the team form
-    @PostMapping("/{teamId}/update")
-    public String updateTeam(@PathVariable Long teamId,
-                             @PathVariable String name,
-                             Model model){
-
-        teamService.updateTeam(teamId, name);
-        return "redirect:/teams/{teamId}/edit";
-    }
-
-
-    //Add a player to a team
-    @PostMapping("/{teamId}/addPlayer")
-    public String addPlayerToTeam(@PathVariable Long teamId,
-                                  @RequestParam Long playerId,
-                                  Model model){
-        userService.assignPlayerToTeam(playerId, teamId);
-        return "redirect:/teams/{teamId}/edit";
-    }
-
-
-    @PostMapping("/{teamId}/removePlayer")
-    public String removePlayerFromTeam(@PathVariable Long teamId,
-                                       @RequestParam Long playerId,
-                                       Model model){
-        teamService.removePlayerFromTeam(teamId, playerId);
-        return "redirect:/teams/{teamId}/edit";
-    }
-
-
-
-
-//    @PostMapping
-//    public ResponseEntity<Team> createTeam(@Valid @RequestBody Team team){
-//        Team savedTeam = teamService.saveTeam(team);
-//        return new ResponseEntity<>(savedTeam, HttpStatus.CREATED);
-//    }
-//
-
     @PostMapping("/create")
-    public String createTeam(@ModelAttribute("team") Team team,@RequestParam Long captainId, Model model){
-        try{
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createTeam(@ModelAttribute("team") Team team, @RequestParam Long captainId, Model model) {
+        try {
             Optional<User> captainOpt = userService.findUserById(captainId);
-            if(captainOpt.isEmpty()){
+            if (captainOpt.isEmpty()) {
                 throw new IllegalStateException("Captain not found!");
             }
 
-            User captain = captainOpt.get();
-
-            if(captain.getRole() != User.Role.ROLE_CAPTAIN){
-                throw new IllegalStateException("ONly captains can create teams.");
-            }
-            team.setCaptain(captain);
+            team.setCaptain(captainOpt.get());
             team.setStatus(Team.Status.PENDING);
             teamService.saveTeam(team);
 
             return "redirect:/teams";
-        }catch(IllegalStateException e){
+        } catch (IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
             return "team-create";
         }
     }
 
+    @GetMapping("/{teamId}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String showEditTeamForm(@PathVariable Long teamId, Model model) {
+        Optional<Team> teamOpt = teamService.findTeamById(teamId);
+        if (teamOpt.isPresent()) {
+            Team team = teamOpt.get();
 
-    @PostMapping("/assign-user")
-    public String assignUserToTeam(@ModelAttribute("userId") Long userId, @ModelAttribute("teamId") Long teamId, Model model){
-        try{
-            userService.assignPlayerToTeam(userId, teamId); // Assign the user (captain or player )
-            model.addAttribute("message", "User assigned to the team successfully!");
+            // Prevent editing rejected teams
+            if (team.getStatus() == Team.Status.REJECTED) {
+                model.addAttribute("error", "Rejected teams cannot be edited.");
+                return "error";
+            }
 
-        }catch (IllegalStateException e){
+            List<User> availablePlayers = userService.getUnassignedPlayers();
+            System.out.println("Available Players: " + availablePlayers);
+
+
+            model.addAttribute("team", team);
+            model.addAttribute("players", availablePlayers);
+            return "team-edit";
+        } else {
+            model.addAttribute("error", "Team not found");
+            return "error";
+        }
+    }
+
+    @PostMapping("/{teamId}/assign-player")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String assignPlayer(@PathVariable Long teamId, @RequestParam Long playerId, Model model) {
+        try {
+            teamService.assignPlayerToTeam(teamId, playerId);
+            return "redirect:/teams/" + teamId + "/edit";
+        } catch (IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
-        }
-        return "landingPage";
-    }
-
-
-
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Team> updateTeam(@PathVariable Long id,@Valid @RequestBody Team teamDetails){
-        Optional<Team> existingTeam = teamService.findTeamById(id);
-
-
-        if(existingTeam.isPresent()){
-            Team team = existingTeam.get();
-            team.setName(teamDetails.getName());
-            Team updatedTeam = teamService.saveTeam(team);
-            return ResponseEntity.ok(updatedTeam);
-        }else {
-            return ResponseEntity.notFound().build();
+            return "team-edit";
         }
     }
 
-
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTeam(@PathVariable Long id){
-        teamService.deleteTeamById(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{teamId}/removePlayer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String removePlayerFromTeam(@PathVariable Long teamId, @RequestParam Long playerId, Model model) {
+        teamService.removePlayerFromTeam(teamId, playerId);
+        return "redirect:/teams/" + teamId + "/edit";
     }
-
-
-
 
     @GetMapping("/pending")
-    public String getPendingTeams(Model model){
+    @PreAuthorize("hasRole('ADMIN')")
+    public String getPendingTeams(Model model) {
         model.addAttribute("pendingTeams", teamService.getPendingTeams());
         return "team-approval";
     }
 
-
     @PostMapping("/{teamId}/approve")
-    public String approveTeam(@PathVariable Long teamId){
+    @PreAuthorize("hasRole('ADMIN')")
+    public String approveTeam(@PathVariable Long teamId) {
         teamService.approveTeam(teamId);
         return "redirect:/teams/pending";
     }
 
-
     @PostMapping("/{teamId}/reject")
-    public String rejectTeam(@PathVariable Long teamId){
+    @PreAuthorize("hasRole('ADMIN')")
+    public String rejectTeam(@PathVariable Long teamId) {
         teamService.rejectTeam(teamId);
         return "redirect:/teams/pending";
     }
 
 
+    @PostMapping("/{teamId}/update")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String updateTeam(@PathVariable Long teamId, @RequestParam String name, Model model){
+        try{
+            teamService.updateTeam(teamId, name);
+            return "redirect:/teams";
+        }catch (IllegalStateException e){
+            model.addAttribute("error", e.getMessage());
+            return "team-edit";
+        }
+    }
 
+    @PostMapping("/{teamId}/delete")
+    @DeleteMapping("/{teamId}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteTeam(@PathVariable Long teamId){
+        teamService.deleteTeamById(teamId);
+        return "redirect:/teams";
+    }
 
 }
 

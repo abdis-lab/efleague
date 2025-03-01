@@ -75,7 +75,7 @@ public class UserWebController {
         }
 
 
-        userService.saveUser(user);
+        userService.registerUser(user);
         redirectAttributes.addFlashAttribute("message", "Registration successful!");
         return "redirect:/users/login";
     }

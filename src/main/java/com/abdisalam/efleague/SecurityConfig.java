@@ -35,12 +35,14 @@ public class SecurityConfig {
 
         httpSecurity
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/landingPage", "/users/login", "/users/signup", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/landingPage","/test-email", "/users/login", "/users/signup", "/css/**", "/js/**").permitAll()
 
                         //Only captains and admins can create and manage teams
-                        .requestMatchers("/teams/create", "/teams/{teamId}/edit").hasAnyRole("CAPTAIN", "ADMIN")
+                        .requestMatchers("/teams/create").hasAnyRole("ADMIN")
 
-                        //All authenticated users can view temas and matchups
+                        .requestMatchers("/teams/{teamId}/edit").hasAnyRole("ADMIN")
+
+                        //All authenticated users can view teams and matchups
                         .requestMatchers("/teams", "/matchups").authenticated()
 
                         .anyRequest().authenticated()

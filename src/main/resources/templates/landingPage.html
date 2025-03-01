@@ -26,6 +26,9 @@
         <div class="flex space-x-6">
             <a href="#about" class="text-lg text-light hover:text-accent transition duration-300">About Us</a>
             <a href="#fixtures" class="text-lg text-light hover:text-accent transition duration-300">Next Match</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/pending" class="text-lg text-light hover:text-accent transition duration-300">Pending Teams</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams" class="text-lg text-light hover:text-accent transition duration-300">Manage Teams</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/users/manage" class="text-lg text-light hover:text-accent transition duration-300">Manage Users</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/signup" class="text-lg text-light hover:text-accent transition duration-300">Sign Up</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="text-lg text-light hover:text-accent transition duration-300">Login</a>
             <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-lg text-light hover:text-accent transition duration-300">Profile</a>
@@ -36,6 +39,7 @@
         </div>
     </div>
 </header>
+
 
 <!-- Hero Section -->
 <section class="relative h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('/images/basketball-court.jpg');">

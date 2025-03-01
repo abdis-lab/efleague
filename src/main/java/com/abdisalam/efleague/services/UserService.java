@@ -1,15 +1,11 @@
 package com.abdisalam.efleague.services;
 
-import com.abdisalam.efleague.modal.Player;
-import com.abdisalam.efleague.modal.Team;
 import com.abdisalam.efleague.modal.User;
 import com.abdisalam.efleague.repositories.PlayerRepository;
 import com.abdisalam.efleague.repositories.TeamRepository;
 import com.abdisalam.efleague.repositories.UserRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +19,57 @@ public class UserService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
 
+    private final EmailService emailService;
+
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder, PlayerRepository playerRepository, TeamRepository teamRepository){
+    public UserService(EmailService emailService,UserRepository userRepository,PasswordEncoder passwordEncoder, PlayerRepository playerRepository, TeamRepository teamRepository){
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.playerRepository = playerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
+
+
+
+    public void registerUser(User user) {
+        userRepository.save(user);
+
+        // 🔥 DEBUG: Ensure this is being called
+        System.out.println("📧 Attempting to send Commissioner Notification...");
+
+        emailService.sendCommissionerNotification(
+                "New User Registered: " + user.getUsername(),
+                user.getUsername(),
+                user.getRole().name() // Convert Enum to String
+        );
+
+        System.out.println("✅ Email function executed successfully!");
+    }
+
+
+
+
+    @PostConstruct
+    public void createDefaultAdmin(){
+        Optional<User> existingAdmin = userRepository.findByRole(User.Role.ROLE_ADMIN);
+
+
+        if(existingAdmin.isEmpty()){
+            User admin = new User();
+            admin.setUsername("commissioner");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRole(User.Role.ROLE_ADMIN);
+            admin.setTeam(null);
+
+
+            userRepository.save(admin);
+            System.out.println("Commissioner account created: Username -> commissioner, Password -> admin123");
+        }
+    }
+
+
 
     // Override method to load users by username for authentication
     @Transactional
@@ -39,38 +78,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
-    //Assign a player to an existing team
-    public void assignPlayerToTeam(Long playerId, Long teamId){
-        Optional<User> userOpt = userRepository.findById(playerId);
-        Optional<Team> teamOpt = teamRepository.findById(teamId);
-
-        if(userOpt.isPresent() && teamOpt.isPresent()){
-            User user = userOpt.get();
-            Team team = teamOpt.get();
-
-            //Only allow assignment if the user is a PLAYER (not a captain)
-            if(user.getRole() == User.Role.ROLE_CAPTAIN) {
-                //Ensure the captain isn't already assigned to another team
-                Optional<Team> existingTeam = teamRepository.findByCaptain(user);
-                if (existingTeam.isPresent()) {
-                    throw new IllegalStateException("User is already a captain of another team.");
-                }
-                team.setCaptain(user);
-
-            }
-
-            // Add the user to the team's players list (both captains and players go here)
-                user.setTeam(team); // Associate user with the team
-                team.getUserPlayers().add(user); // Add user to the team's players list
-                teamRepository.save(team); // Save the team
-
-        }else {
-            throw new IllegalStateException("User or Team not Found");
-        }
-
-
-    }
 
     public Optional<User> findByUsername(String username){
         return userRepository.findByUsername(username);
@@ -88,6 +95,10 @@ public class UserService {
 
     public void deleteUserById(Long id){
         userRepository.deleteById(id);
+    }
+
+    public List<User> getUnassignedPlayers(){
+        return userRepository.findByTeamIsNull();// Fetch player with no assigned team
     }
 
 }

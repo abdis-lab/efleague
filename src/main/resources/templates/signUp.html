@@ -21,6 +21,8 @@
                 <span th:text="${err.message}"></span>
             </div>
 
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}"/>
+
             <!-- Username input -->
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700">Username</label>

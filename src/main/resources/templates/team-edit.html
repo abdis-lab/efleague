@@ -1,51 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Edit team</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Team</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-<div class="container mx-auto p-5">
-    <!-- Page Heading -->
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">Edit Team: <span th:text="${team.name}"></span></h1>
+<body class="bg-gray-100">
+<!-- Navigation Bar -->
+<header class="bg-gray-900 text-white shadow-md fixed w-full top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="text-3xl font-bold">🏀 E&F League</a>
+        <nav class="flex space-x-6">
+            <a href="/teams" class="hover:text-blue-400 transition duration-300">Teams</a>
+            <a href="/matchups" class="hover:text-blue-400 transition duration-300">Matchups</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="hover:text-blue-400 transition duration-300">Profile</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="hover:text-green-400 transition duration-300">Create Team</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/logout" class="bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-700 transition duration-300">Logout</a>
+            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="bg-blue-500 px-4 py-2 rounded-lg text-white hover:bg-blue-700 transition duration-300">Login</a>
+        </nav>
+    </div>
+</header>
 
-    <!-- Form to update the team name -->
-    <form action="/teams/${team.id}/update" method="post" class="bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto">
-        <!-- Team Name Field -->
-        <div class="mb-5">
-            <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Team Name:</label>
-            <input type="text" id="name" name="name" th:value="${team.name}" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter team name" required>
-        </div>
+<!-- Page Content -->
+<div class="container mx-auto mt-20 p-6 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <!-- Team Information -->
+    <div class="bg-white p-6 rounded-lg shadow-lg col-span-1 md:col-span-2">
+        <h1 class="text-4xl font-bold text-gray-800 text-center mb-6">Team: <span th:text="${team.name}"></span></h1>
+        <form th:action="@{/teams/{teamId}/update(teamId=${team.id})}" method="post" class="space-y-4">
+            <label for="name" class="block text-gray-700 text-sm font-semibold">Team Name:</label>
+            <input type="text" id="name" name="name" th:value="${team.name}" class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300" required>
+            <div class="flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                    Update Team
+                </button>
+            </div>
+        </form>
+    </div>
 
-        <!-- Submit Button -->
-        <div class="flex items-center justify-center">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300" type="submit">
-                Update Team
-            </button>
-        </div>
-    </form>
-
-    <!-- Manage Players Section -->
-    <div class="mt-10">
+    <!-- Player Management -->
+    <div class="bg-white p-6 rounded-lg shadow-lg col-span-2">
         <h2 class="text-3xl font-bold text-gray-800 mb-5">Manage Players</h2>
-
-        <!-- Player List Table -->
-        <div class="overflow-x-auto shadow-md rounded-lg bg-white">
-            <table class="table-auto w-full text-left">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-200 text-gray-600">
                 <tr>
-                    <th class="px-6 py-4">Player Name</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
+                    <th class="px-6 py-3">Player Name</th>
+                    <th class="px-6 py-3 text-right">Actions</th>
                 </tr>
                 </thead>
-                <tbody class="text-gray-700">
-                <!-- Loop through the players list -->
-                <tr th:each="player : ${team.players}" class="border-t">
-                    <td class="px-6 py-4" th:text="${player.username}">Player Name</td>
+                <tbody>
+                <tr th:each="player : ${team.userPlayers}" class="border-t">
+                    <td class="px-6 py-4" th:text="${player.username}"></td>
                     <td class="px-6 py-4 text-right">
-                        <form th:action="@{/teams/{id}/removePlayer(id=${team.id})}" method="post">
+                        <form th:action="@{/teams/{teamId}/removePlayer(teamId=${team.id})}" method="post">
                             <input type="hidden" name="playerId" th:value="${player.id}">
-                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-300">Remove</button>
+                            <button class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-300">
+                                Remove
+                            </button>
                         </form>
                     </td>
                 </tr>
@@ -55,27 +67,38 @@
     </div>
 
     <!-- Add Player Section -->
-    <div class="mt-10">
+    <div class="bg-white p-6 rounded-lg shadow-lg col-span-1">
         <h2 class="text-3xl font-bold text-gray-800 mb-5">Add Player to Team</h2>
-
-        <form action="/teams/${team.id}/addPlayer" method="post" class="bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto">
-            <!-- Player Selection Field -->
-            <div class="mb-5">
-                <label for="playerId" class="block text-gray-700 text-sm font-semibold mb-2">Select Player:</label>
-                <select id="playerId" name="playerId" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <!-- Loop through all users and display them as player options -->
-                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}">Select a Player</option>
+        <p th:if="${team.userPlayers.size() >= 10}" class="text-red-500 text-lg font-bold">This team has reached the maximum number of players (10).</p>
+        <div th:if="${team.userPlayers.size() < 10}">
+            <form th:action="@{/teams/{teamId}/assign-player(teamId=${team.id})}" method="post">
+                <label for="playerId" class="block text-gray-700 text-sm font-semibold">Select Player:</label>
+                <select id="playerId" name="playerId" class="w-full p-3 border rounded-lg focus:ring focus:ring-green-300">
+                    <option value="" disabled selected>-- Select a Player --</option>
+                    <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.username}"></option>
                 </select>
-            </div>
+                <div class="flex justify-center mt-4">
+                    <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                        Add Player
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-            <!-- Add Player Button -->
-            <div class="flex items-center justify-center">
-                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                    Add Player
-                </button>
-            </div>
+<!-- Delete Team Section -->
+<div class="container mx-auto mt-10 bg-red-100 p-6 rounded-lg shadow-lg max-w-2xl">
+    <h2 class="text-2xl font-bold text-red-600 mb-5 text-center">Danger Zone</h2>
+    <p class="text-red-500 text-lg font-semibold text-center">Deleting this team is permanent and cannot be undone.</p>
+    <div class="flex justify-center mt-4">
+        <form th:action="@{/teams/{teamId}/delete(teamId=${team.id})}" method="post">
+            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                Delete Team
+            </button>
         </form>
     </div>
 </div>
 </body>
+</html>
 </html>

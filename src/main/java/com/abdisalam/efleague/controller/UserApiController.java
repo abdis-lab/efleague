@@ -66,16 +66,16 @@ public class UserApiController {
         User updatedUser = userService.saveUser(user);
         return ResponseEntity.ok(updatedUser);
     }
-
-    // Assign player to team
-    @PostMapping("/{playerId}/assign-to-team/{teamId}")
-    public ResponseEntity<String> assignPlayerToTeam(
-            @PathVariable Long playerId,
-            @PathVariable Long teamId
-    ) {
-        userService.assignPlayerToTeam(playerId, teamId);
-        return ResponseEntity.ok("Player assigned to team");
-    }
+//
+//    // Assign player to team
+//    @PostMapping("/{playerId}/assign-to-team/{teamId}")
+//    public ResponseEntity<String> assignPlayerToTeam(
+//            @PathVariable Long playerId,
+//            @PathVariable Long teamId
+//    ) {
+//        userService.assignPlayerToTeam(playerId, teamId);
+//        return ResponseEntity.ok("Player assigned to team");
+//    }
 
     // Delete user
     @DeleteMapping("/{id}")
