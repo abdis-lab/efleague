@@ -86,7 +86,7 @@ public class TeamService {
         }
 
 
-        //ENsure the player is not already assigned to anther team
+        //ENsure the player is not already assigned to another team
         if(player.getTeam() != null){
             throw new IllegalStateException("Player is already assigned to a team");
         }
@@ -102,6 +102,43 @@ public class TeamService {
 
     }
 
+
+
+    public Team assignCaptainToTeam(Long teamId, Long captainId){
+        Optional<Team> teamOpt = teamRepository.findById(teamId);
+        Optional<User> captainOpt = userRepository.findById(captainId);
+
+        if (teamOpt.isEmpty() || captainOpt.isEmpty()) {
+            throw new IllegalStateException("Team or Captain not found!");
+        }
+
+        Team team = teamOpt.get();
+        User newCaptain = captainOpt.get();
+
+        // Ensure the user is actually a captain
+        if (newCaptain.getRole() != User.Role.ROLE_CAPTAIN) {
+            throw new IllegalStateException("Selected user is not a captain!");
+        }
+
+        // If a captain already exists, remove them
+        if (team.getCaptain() != null) {
+            User oldCaptain = team.getCaptain();
+            oldCaptain.setRole(User.Role.ROLE_PLAYER); // Demote the old captain
+            userRepository.save(oldCaptain);
+        }
+
+        // Assign new captain
+        team.setCaptain(newCaptain);
+        newCaptain.setTeam(team);
+
+        // Ensure the captain is in the player list
+        if (!team.getUserPlayers().contains(newCaptain)) {
+            team.getUserPlayers().add(newCaptain);
+        }
+
+        userRepository.save(newCaptain); // Persist the captain
+        return teamRepository.save(team); // Persist the team
+    }
 
 
 

@@ -1,8 +1,10 @@
 package com.abdisalam.efleague.services;
 
 
+import com.abdisalam.efleague.modal.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -20,38 +22,38 @@ public class EmailService {
         this.fromEmail = env.getProperty("spring.mail.username"); // Get from application.properties
     }
 
-    public void sendCommissionerNotification(String subject, String username, String role) {
-        String emailBody = """
-        📢 **New User Registration Notification**
-        
-        A new user has signed up on the E&F Basketball League platform. Here are the details:
-
-        🔹 **Username:** %s
-        🔹 **Role:** %s
-        🔹 **Signup Time:** %s
-
-        **Next Steps for the Commissioner:**
-        - If the user is a *Captain*, review their request and approve/reject their team.
-        - If the user is a *Player*, monitor their team assignment or manually assign them.
-        - For any necessary follow-ups, you may reach out to the user.
-
-        ✅ Please log in to the **Admin Panel** to manage user requests.
-
-        🔗 [Go to Admin Panel](http://localhost:8080/admin)
-
-        ---
-        📌 *This is an automated email. Do not reply.*
-        """.formatted(username, role, java.time.LocalDateTime.now());
-
-        // Send Email
+    public void sendCommissionerNotification(String subject, String userEmail, String username, String role, String teamPreference) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("abdisalamfresh@gamil.com");
+        message.setTo("abdik171@gmail.com");  // Change to commissioner email
         message.setSubject(subject);
+
+        String emailBody = String.format(
+                """
+                🏀 New User Inquiry to Join a Team 🏀
+        
+                📌 **User Information**
+                - **Username:** %s
+                - **Email:** %s
+                - **Role Selected:** %s
+                - **Team Preference:** %s
+        
+                📨 **Action Required**
+                Please review the user's request and assign them to a team if appropriate.
+        
+                ⚠️ **This is an automated email. Please do not reply directly.**
+                """,
+                username, userEmail, role, teamPreference
+        );
+
         message.setText(emailBody);
+        message.setFrom("abdisalamfresh@gmail.com");  // Ensure this is your configured email
 
-        mailSender.send(message);
-
-        System.out.println("📧 Email sent to commissioner successfully!");
+        try {
+            mailSender.send(message);
+            System.out.println("📧 Commissioner notification sent successfully!");
+        } catch (Exception e) {
+            System.out.println("❌ Error Sending Inquiry Email: " + e.getMessage());
+        }
     }
 
 }

@@ -33,27 +33,9 @@ public class UserService {
 
 
 
-    public void registerUser(User user) {
-        userRepository.save(user);
-
-        // 🔥 DEBUG: Ensure this is being called
-        System.out.println("📧 Attempting to send Commissioner Notification...");
-
-        emailService.sendCommissionerNotification(
-                "New User Registered: " + user.getUsername(),
-                user.getUsername(),
-                user.getRole().name() // Convert Enum to String
-        );
-
-        System.out.println("✅ Email function executed successfully!");
-    }
-
-
-
-
     @PostConstruct
     public void createDefaultAdmin(){
-        Optional<User> existingAdmin = userRepository.findByRole(User.Role.ROLE_ADMIN);
+        List<User> existingAdmin = userRepository.findByRole(User.Role.ROLE_ADMIN);
 
 
         if(existingAdmin.isEmpty()){
@@ -73,9 +55,24 @@ public class UserService {
 
     // Override method to load users by username for authentication
     @Transactional
-    public User saveUser(User user){
+    public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        // Notify commissioner after user is saved
+        System.out.println("📧 Attempting to send Commissioner Notification...");
+
+        emailService.sendCommissionerNotification(
+                "New User Registered: " + user.getUsername(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole().name(),
+                user.getTeamPreference()
+        );
+
+        System.out.println("✅ Email function executed successfully!");
+
+        return user;
     }
 
 
@@ -90,6 +87,11 @@ public class UserService {
 
     public List<User> getAllUsers(){
         return userRepository.findAll();
+    }
+
+
+    public List<User> getAllCaptain(){
+        return userRepository.findByRole(User.Role.ROLE_CAPTAIN);
     }
 
 

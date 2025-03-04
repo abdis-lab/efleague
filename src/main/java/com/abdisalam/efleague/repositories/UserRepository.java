@@ -13,8 +13,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     public Optional<User> findByUsername(String username);
 
-    Optional<User> findByRole(User.Role role);
+    List<User> findByRole(User.Role role);
 
     @Query("SELECT u FROM User u WHERE u.team IS NULL AND u.role = 'ROLE_PLAYER'")
     List<User> findByTeamIsNull();
+
+
 }

@@ -27,6 +27,9 @@ public class User implements UserDetails {
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50")
     private String username;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
     @NotNull(message = "Password cannot be empty")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;

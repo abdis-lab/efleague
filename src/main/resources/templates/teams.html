@@ -1,63 +1,285 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Teams Managment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                container: {
+                    center: true,
+                    padding: "2rem",
+                    screens: {
+                        "2xl": "1400px",
+                    },
+                },
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96.1%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+        }
+
+        .dark {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 4.9%;
+            --card-foreground: 210 40% 98%;
+            --popover: 222.2 84% 4.9%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 217.2 91.2% 59.8%;
+            --primary-foreground: 222.2 47.4% 11.2%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 224.3 76.3% 48%;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body>
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Teams</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-
-<header class="bg-gray-900 text-white shadow-md fixed w-full top-0 z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="text-3xl font-bold">🏀 E&F League</a>
-        <nav class="flex space-x-6">
-            <a href="/teams" class="hover:text-blue-400 transition duration-300">Teams</a>
-            <a href="/matchups" class="hover:text-blue-400 transition duration-300">Matchups</a>
-
-            <!-- Show only for authenticated users -->
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="hover:text-blue-400 transition duration-300">Profile</a>
-
-            <!-- Show only for admins (commissioner) -->
-            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="hover:text-green-400 transition duration-300">Create Team</a>
-
-            <!-- Show login/logout based on authentication -->
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/logout" class="bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-700 transition duration-300">Logout</a>
-            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="bg-blue-500 px-4 py-2 rounded-lg text-white hover:bg-blue-700 transition duration-300">Login</a>
+<body class="min-h-screen bg-background text-foreground">
+<!-- Navigation -->
+<header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div class="container flex h-16 items-center justify-between">
+        <a href="/" class="flex items-center gap-2 text-2xl font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+            <span>E&F League</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6">
+            <a href="/landingPage" class="text-sm font-medium transition-colors hover:text-primary">Home</a>
+            <a href="/teams" class="text-sm font-medium transition-colors hover:text-primary">Teams</a>
+            <a href="/matchups" class="text-sm font-medium transition-colors hover:text-primary">Matchups</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="text-sm font-medium transition-colors hover:text-primary">Create Team</a>
+            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Login</a>
+            <form id="logout-form" th:action="@{/logout}" method="post" style="display: none;">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            </form>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90">Logout</a>
         </nav>
+        <button class="inline-flex items-center justify-center rounded-md border border-input bg-background p-2 text-sm font-medium shadow-sm md:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+        </button>
     </div>
 </header>
 
+<!-- Main Content -->
+<main class="container py-6 md:py-10">
+    <div class="flex flex-col gap-2 mb-8">
+        <h1 class="text-3xl font-bold tracking-tight">Teams Management</h1>
+        <p class="text-muted-foreground">View and manage all teams in the E&F League</p>
+    </div>
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold">Teams</h1>
+        <!-- Pending Teams Button -->
+        <button data-modal-target="#pending-teams-modal" data-modal-toggle="pending-teams-modal"
+                class="px-4 py-2 border m-2 border-black text-black hover:text-white hover:bg-black transition-colors duration-200">
+            Pending Teams
+        </button>
 
+        <!-- Create Team Button -->
+        <button data-modal-target="#create-team-modal" data-modal-toggle="create-team-modal"
+                class="px-4 py-2 border m-2 border-black text-black hover:text-white hover:bg-black transition-colors duration-200">
+            + Create Team
+        </button>
 
-<div class="container mx-auto mt-20 p-6">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">Teams</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div th:each="team : ${teams}" class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2" th:text="${team.name}"></h2>
-            <p class="text-sm" th:text="${team.status}"></p>
-            <div class="mt-4 flex justify-between">
-                <a th:href="@{/teams/{teamId}/edit(teamId=${team.id})}"
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Edit
-                </a>
-                <a th:if="${team.status == 'PENDING'}"
-                   th:href="@{/teams/{teamId}/approve(teamId=${team.id})}"
-                   class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Approve
-                </a>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div th:each="team : ${teams}" class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold leading-none tracking-tight" th:text="${team.name}">Team Name</h2>
+                    <span th:text="${team.status}" th:class="${team.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'} + ' px-2 py-1 rounded-full text-xs font-medium'">
+                            Status
+                        </span>
+                </div>
+                <p class="text-sm text-muted-foreground">Team description or additional information can go here.</p>
+                <small th:text="${team.captain != null ? team.captain.username : 'No Captain'}">Captain: Abdi</small>
+                <div class="flex items-center justify-between pt-4">
+                    <a th:href="@{/teams/{teamId}/edit(teamId=${team.id})}"
+                       class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-9 px-4 py-2 text-sm font-medium shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+                        Edit
+                    </a>
+                    <a th:if="${team.status == 'PENDING'}"
+                       th:href="@{/teams/{teamId}/approve(teamId=${team.id})}"
+                       class="inline-flex items-center justify-center rounded-md bg-green-500 text-white h-9 px-4 py-2 text-sm font-medium shadow hover:bg-green-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+                        Approve
+                    </a>
+                </div>
             </div>
+        </div>
+    </div>
+</main>
+
+
+
+<!-- Pending Teams Modal -->
+<div id="pending-teams-modal" tabindex="-1" aria-hidden="true"
+     class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+    <div class="relative bg-white w-3/4 max-w-2xl p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold">Pending Teams</h2>
+            <button data-modal-hide="pending-teams-modal"
+                    class="text-gray-600 hover:text-gray-900 text-xl">&times;</button>
+        </div>
+        <div class="py-4">
+            <table class="w-full border-collapse border border-gray-300">
+                <thead class="bg-gray-200">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2">Team Name</th>
+                    <th class="border border-gray-300 px-4 py-2">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="team : ${pendingTeams}">
+                    <td class="border border-gray-300 px-4 py-2" th:text="${team.name}"></td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <form th:action="@{/teams/{teamId}/approve(teamId=${team.id})}" method="post">
+                            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+                                Approve
+                            </button>
+                        </form>
+                        <form th:action="@{/teams/{teamId}/reject(teamId=${team.id})}" method="post">
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
+                                Reject
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-</body>
-</html>
+
+
+<!-- Create Team Modal -->
+<div id="create-team-modal" tabindex="-1" aria-hidden="true"
+     class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-2/3 relative">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold">Create New Team</h2>
+            <button data-modal-hide="create-team-modal"
+                    class="text-gray-600 hover:text-gray-900 text-xl">&times;</button>
+        </div>
+
+        <form th:action="@{/teams/create}" method="post" th:object="${team}" class="space-y-4 mt-4">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div>
+                <label for="teamName" class="block text-gray-700 text-sm font-semibold">Team Name:</label>
+                <input type="text" id="teamName" name="name"
+                       class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
+                       placeholder="Enter team name" required>
+            </div>
+
+            <div>
+                <label for="captainId" class="block text-gray-700 text-sm font-semibold">Assign Captain:</label>
+                <select id="captainId" th:field="*{captain}" name="captainId"
+                        class="w-full p-3 border rounded-lg focus:ring focus:ring-indigo-300">
+                    <option value="" disabled selected>-- Select Captain --</option>
+                    <option th:each="captain : ${captains}" th:value="${captain.id}" th:text="${captain.username}"></option>
+                </select>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="submit"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                    Create Team
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.0/flowbite.min.js"></script>
+
 </body>
 </html>

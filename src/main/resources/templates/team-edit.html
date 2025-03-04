@@ -4,101 +4,345 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Team</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                container: {
+                    center: true,
+                    padding: "2rem",
+                    screens: {
+                        "2xl": "1400px",
+                    },
+                },
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96.1%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+        }
+
+        .dark {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 4.9%;
+            --card-foreground: 210 40% 98%;
+            --popover: 222.2 84% 4.9%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 217.2 91.2% 59.8%;
+            --primary-foreground: 222.2 47.4% 11.2%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 224.3 76.3% 48%;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-<!-- Navigation Bar -->
-<header class="bg-gray-900 text-white shadow-md fixed w-full top-0 z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="text-3xl font-bold">🏀 E&F League</a>
-        <nav class="flex space-x-6">
-            <a href="/teams" class="hover:text-blue-400 transition duration-300">Teams</a>
-            <a href="/matchups" class="hover:text-blue-400 transition duration-300">Matchups</a>
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="hover:text-blue-400 transition duration-300">Profile</a>
-            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="hover:text-green-400 transition duration-300">Create Team</a>
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/logout" class="bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-700 transition duration-300">Logout</a>
-            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="bg-blue-500 px-4 py-2 rounded-lg text-white hover:bg-blue-700 transition duration-300">Login</a>
+<body class="min-h-screen bg-background text-foreground">
+<!-- Navigation -->
+<header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div class="container flex h-16 items-center justify-between">
+        <a href="/" class="flex items-center gap-2 text-2xl font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+            <span>E&F League</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6">
+            <a href="/teams" class="text-sm font-medium transition-colors hover:text-primary">Teams</a>
+            <a href="/matchups" class="text-sm font-medium transition-colors hover:text-primary">Matchups</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="text-sm font-medium transition-colors hover:text-primary">Create Team</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/logout" class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90">Logout</a>
+            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Login</a>
         </nav>
+        <button class="inline-flex items-center justify-center rounded-md border border-input bg-background p-2 text-sm font-medium shadow-sm md:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+        </button>
     </div>
 </header>
 
-<!-- Page Content -->
-<div class="container mx-auto mt-20 p-6 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-    <!-- Team Information -->
-    <div class="bg-white p-6 rounded-lg shadow-lg col-span-1 md:col-span-2">
-        <h1 class="text-4xl font-bold text-gray-800 text-center mb-6">Team: <span th:text="${team.name}"></span></h1>
-        <form th:action="@{/teams/{teamId}/update(teamId=${team.id})}" method="post" class="space-y-4">
-            <label for="name" class="block text-gray-700 text-sm font-semibold">Team Name:</label>
-            <input type="text" id="name" name="name" th:value="${team.name}" class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300" required>
-            <div class="flex justify-center">
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                    Update Team
-                </button>
-            </div>
-        </form>
+<!-- Main Content -->
+<main class="container py-6 md:py-10">
+    <div class="flex flex-col gap-2 mb-8">
+        <h1 class="text-3xl font-bold tracking-tight">Team Management</h1>
+        <div class="flex items-center text-sm text-muted-foreground">
+            <a href="/teams" class="hover:text-primary">Teams</a>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mx-1">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <span th:text="${team.name}">Team Name</span>
+        </div>
     </div>
 
-    <!-- Player Management -->
-    <div class="bg-white p-6 rounded-lg shadow-lg col-span-2">
-        <h2 class="text-3xl font-bold text-gray-800 mb-5">Manage Players</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-200 text-gray-600">
-                <tr>
-                    <th class="px-6 py-3">Player Name</th>
-                    <th class="px-6 py-3 text-right">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="player : ${team.userPlayers}" class="border-t">
-                    <td class="px-6 py-4" th:text="${player.username}"></td>
-                    <td class="px-6 py-4 text-right">
-                        <form th:action="@{/teams/{teamId}/removePlayer(teamId=${team.id})}" method="post">
-                            <input type="hidden" name="playerId" th:value="${player.id}">
-                            <button class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-300">
-                                Remove
+    <div class="w-full" x-data="{ activeTab: 'details' }">
+        <!-- Tabs -->
+        <div class="flex space-x-1 rounded-lg bg-muted p-1 mb-6 max-w-md">
+            <button
+                    @click="activeTab = 'details'"
+                    :class="activeTab === 'details' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                </svg>
+                Team Details
+            </button>
+            <button
+                    @click="activeTab = 'players'"
+                    :class="activeTab === 'players' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'"
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Players
+            </button>
+        </div>
+
+        <!-- Team Details Tab -->
+        <div x-show="activeTab === 'details'" class="space-y-6">
+            <div class="grid gap-6 md:grid-cols-2">
+                <!-- Team Information Card -->
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight">Team Information</h3>
+                        <p class="text-sm text-muted-foreground">Update your team's basic information</p>
+                    </div>
+                    <div class="p-6">
+                        <form th:action="@{/teams/{teamId}/update(teamId=${team.id})}" method="post" class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Team Name</label>
+                                <input type="text" id="name" name="name" th:value="${team.name}" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required>
+                            </div>
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 w-full text-sm font-medium shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                Update Team
                             </button>
                         </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Add Player Section -->
-    <div class="bg-white p-6 rounded-lg shadow-lg col-span-1">
-        <h2 class="text-3xl font-bold text-gray-800 mb-5">Add Player to Team</h2>
-        <p th:if="${team.userPlayers.size() >= 10}" class="text-red-500 text-lg font-bold">This team has reached the maximum number of players (10).</p>
-        <div th:if="${team.userPlayers.size() < 10}">
-            <form th:action="@{/teams/{teamId}/assign-player(teamId=${team.id})}" method="post">
-                <label for="playerId" class="block text-gray-700 text-sm font-semibold">Select Player:</label>
-                <select id="playerId" name="playerId" class="w-full p-3 border rounded-lg focus:ring focus:ring-green-300">
-                    <option value="" disabled selected>-- Select a Player --</option>
-                    <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.username}"></option>
-                </select>
-                <div class="flex justify-center mt-4">
-                    <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                        Add Player
-                    </button>
+                    </div>
                 </div>
-            </form>
+
+                <!-- Team Captain Card -->
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight">Team Captain</h3>
+                        <p class="text-sm text-muted-foreground">Assign a captain to lead your team</p>
+                    </div>
+                    <div class="p-6">
+                        <form th:action="@{/teams/{teamId}/assign-captain(teamId=${team.id})}" method="post" class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="captainId" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Select Captain</label>
+                                <select name="captainId" id="captainId" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                                    <option value="" disabled selected>-- Select Captain --</option>
+                                    <option th:each="captain : ${captains}" th:value="${captain.id}" th:text="${captain.username}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 w-full text-sm font-medium shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                Assign Captain
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone Card -->
+            <div class="rounded-lg border border-destructive/50 bg-card text-card-foreground shadow-sm">
+                <div class="flex flex-col space-y-1.5 p-6 border-b border-destructive/20 bg-destructive/5">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-destructive">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" x2="12" y1="8" y2="12"></line>
+                            <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                        </svg>
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight text-destructive">Danger Zone</h3>
+                    </div>
+                    <p class="text-sm text-destructive/80">Actions here cannot be undone. Please proceed with caution.</p>
+                </div>
+                <div class="p-6 pt-6">
+                    <div class="flex flex-col gap-4">
+                        <p class="text-sm text-muted-foreground">
+                            Deleting this team will remove all associated data, including player assignments and match history.
+                        </p>
+                        <form th:action="@{/teams/{teamId}/delete(teamId=${team.id})}" method="post">
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-destructive text-destructive-foreground h-10 px-4 py-2 text-sm font-medium shadow hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 w-full sm:w-auto">
+                                Delete Team
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Players Tab -->
+        <div x-show="activeTab === 'players'" class="space-y-6">
+            <div class="grid gap-6 md:grid-cols-3">
+                <!-- Team Roster Card -->
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm md:col-span-2">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight">Team Roster</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Manage players on your team (<span th:text="${team.userPlayers.size()}">8</span>/10 players)
+                        </p>
+                    </div>
+                    <div class="p-6">
+                        <div class="rounded-md border">
+                            <table class="w-full caption-bottom text-sm">
+                                <thead class="[&_tr]:border-b">
+                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Player</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Role</th>
+                                    <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody class="[&_tr:last-child]:border-0">
+                                <tr th:each="player : ${team.userPlayers}" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <td class="p-4 align-middle font-medium">
+                                        <div class="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-muted-foreground">
+                                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            <span th:text="${player.username}">Player Name</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 align-middle">
+                                        <span th:if="${player.id == team.captain?.id}">Captain</span>
+                                        <span th:unless="${player.id == team.captain?.id}">Player</span>
+                                    </td>
+                                    <td class="p-4 align-middle text-right">
+                                        <form th:action="@{/teams/{teamId}/removePlayer(teamId=${team.id})}" method="post">
+                                            <input type="hidden" name="playerId" th:value="${player.id}">
+                                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-destructive text-destructive-foreground h-8 px-3 text-xs font-medium shadow hover:bg-destructive/90">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Player Card -->
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                    <div class="flex flex-col space-y-1.5 p-6">
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight">Add Player</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Add a new player to your team
+                        </p>
+                    </div>
+                    <div class="p-6">
+                        <div th:if="${team.userPlayers.size() >= 10}" class="text-destructive font-medium mb-4">
+                            This team has reached the maximum number of players (10).
+                        </div>
+                        <form th:if="${team.userPlayers.size() < 10}" th:action="@{/teams/{teamId}/assign-player(teamId=${team.id})}" method="post" class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="playerId" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Select Player</label>
+                                <select id="playerId" name="playerId" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                                    <option value="" disabled selected>-- Select a Player --</option>
+                                    <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.username}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 w-full text-sm font-medium shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                                Add Player
+                            </button>
+                        </form>
+                    </div>
+                    <div class="flex flex-col items-start border-t px-6 py-4 bg-muted/50">
+                        <p class="text-xs text-muted-foreground">
+                            Teams can have a maximum of 10 players. You currently have <span th:text="${team.userPlayers.size()}">8</span> players.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
-<!-- Delete Team Section -->
-<div class="container mx-auto mt-10 bg-red-100 p-6 rounded-lg shadow-lg max-w-2xl">
-    <h2 class="text-2xl font-bold text-red-600 mb-5 text-center">Danger Zone</h2>
-    <p class="text-red-500 text-lg font-semibold text-center">Deleting this team is permanent and cannot be undone.</p>
-    <div class="flex justify-center mt-4">
-        <form th:action="@{/teams/{teamId}/delete(teamId=${team.id})}" method="post">
-            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                Delete Team
-            </button>
-        </form>
-    </div>
-</div>
+<!-- Alpine.js for tab functionality -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
-</html>
 </html>

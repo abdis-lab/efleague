@@ -12,6 +12,7 @@ package com.abdisalam.efleague.controller;
 //import org.springframework.web.bind.annotation.*;
 
 import com.abdisalam.efleague.modal.User;
+import com.abdisalam.efleague.services.EmailService;
 import com.abdisalam.efleague.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -30,9 +31,12 @@ public class UserWebController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserWebController(UserService userService, PasswordEncoder passwordEncoder) {
+    private final EmailService emailService;
+
+    public UserWebController(EmailService emailService,UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     // Show registration form
@@ -49,6 +53,7 @@ public class UserWebController {
             @ModelAttribute("user") User user,
             BindingResult result,
             @RequestParam("role") String role,
+            @RequestParam("email") String email,
             RedirectAttributes redirectAttributes
     ) {
         if(result.hasErrors()){
@@ -75,7 +80,16 @@ public class UserWebController {
         }
 
 
-        userService.registerUser(user);
+        userService.saveUser(user);
+
+        emailService.sendCommissionerNotification(
+                "New User Registered: " + user.getUsername(),
+                user.getEmail(),   // <-- Now this will work ✅
+                user.getUsername(),
+                user.getRole().name(),
+                user.getTeamPreference()
+        );
+
         redirectAttributes.addFlashAttribute("message", "Registration successful!");
         return "redirect:/users/login";
     }

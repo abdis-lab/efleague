@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,14 @@ public class TeamsController {
 
     @GetMapping
     public String getAllTeams(Model model) {
-        model.addAttribute("teams", teamService.getAllTeams());
+        List<Team> teams = teamService.getAllTeams();
+        List<Team> pendingTeams = teamService.getPendingTeams();
+        List<User> captains = userService.getAllCaptain();
+
+
+        model.addAttribute("teams", teams);
+        model.addAttribute("pendingTeams", pendingTeams);
+        model.addAttribute("captain", captains);
         return "teams";
     }
 
@@ -34,8 +42,8 @@ public class TeamsController {
     @PreAuthorize("hasRole('ADMIN')")
     public String showCreateTeamForm(Model model) {
         model.addAttribute("team", new Team());
-        model.addAttribute("users", userService.getAllUsers());
-        return "team-create";
+        model.addAttribute("captains", userService.getAllCaptain());
+        return "teams";
     }
 
     @PostMapping("/create")
@@ -54,7 +62,7 @@ public class TeamsController {
             return "redirect:/teams";
         } catch (IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
-            return "team-create";
+            return "teams";
         }
     }
 
@@ -72,10 +80,14 @@ public class TeamsController {
             }
 
             List<User> availablePlayers = userService.getUnassignedPlayers();
+            List<User> availableCaptains = userService.getAllCaptain();
             System.out.println("Available Players: " + availablePlayers);
 
 
+
+
             model.addAttribute("team", team);
+            model.addAttribute("captains", availableCaptains);
             model.addAttribute("players", availablePlayers);
             return "team-edit";
         } else {
@@ -114,14 +126,14 @@ public class TeamsController {
     @PreAuthorize("hasRole('ADMIN')")
     public String approveTeam(@PathVariable Long teamId) {
         teamService.approveTeam(teamId);
-        return "redirect:/teams/pending";
+        return "redirect:/teams";
     }
 
     @PostMapping("/{teamId}/reject")
     @PreAuthorize("hasRole('ADMIN')")
     public String rejectTeam(@PathVariable Long teamId) {
         teamService.rejectTeam(teamId);
-        return "redirect:/teams/pending";
+        return "redirect:/teams";
     }
 
 
@@ -137,6 +149,32 @@ public class TeamsController {
         }
     }
 
+
+
+
+
+
+
+    @PostMapping("/{teamId}/assign-captain")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String assignCaptain(@PathVariable Long teamId, @RequestParam Long captainId, RedirectAttributes redirectAttributes){
+        try{
+            teamService.assignCaptainToTeam(teamId, captainId);
+            redirectAttributes.addFlashAttribute("message", "Captain assigned successfully.");
+        }catch (IllegalStateException e){
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+       return "redirect:/teams/" + teamId + "/edit";
+
+    }
+
+
+
+
+
+
+
+
     @PostMapping("/{teamId}/delete")
     @DeleteMapping("/{teamId}/delete")
     @PreAuthorize("hasRole('ADMIN')")
@@ -144,6 +182,12 @@ public class TeamsController {
         teamService.deleteTeamById(teamId);
         return "redirect:/teams";
     }
+
+
+
+
+
+
 
 }
 
