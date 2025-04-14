@@ -6,23 +6,6 @@
 </head>
 <body>
 
-<h1>Schedule Games</h1>
 
-<form th:action="@{/matchups/schedule}" th:object="${matchup}" method="post">
-    <label for="startDate">Start Date (YYYY-MM-DD):</label>
-    <input type="datetime-local" id="startDate" th:field="*{gameDateTime}" placeholder="YYYY-MM-DD" required><br>
-
-    <label for="seasonId">Season ID:</label>
-    <input type="number" name="seasonId" id="seasonId" required><br>
-
-    <label for="doubleRoundRobin">Double Round Robin:</label>
-    <input type="checkbox" id="doubleRoundRobin" name="doubleRoundRobin"><br>
-
-    <input type="submit" value="Schedule Games">
-</form>
-
-<div th:if="${message}">
-    <p th:text="${message}"></p>
-</div>
 </body>
 </html>

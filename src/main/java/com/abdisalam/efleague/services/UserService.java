@@ -41,6 +41,7 @@ public class UserService {
         if(existingAdmin.isEmpty()){
             User admin = new User();
             admin.setUsername("commissioner");
+            admin.setEmail("commissioner@abdisalam.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole(User.Role.ROLE_ADMIN);
             admin.setTeam(null);

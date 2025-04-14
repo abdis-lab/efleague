@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface SeasonRepository extends JpaRepository<Season, Long> {
     Optional<Season> findByName(String name);
     List<Season> findByActive(boolean active);
+
+    Optional<Season> findByActiveTrue();
 }

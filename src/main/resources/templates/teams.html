@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teams Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet"/>
     <script>
+        let tailwind;
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -114,8 +117,9 @@
 <!-- Navigation -->
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div class="container flex h-16 items-center justify-between">
-        <a href="/" class="flex items-center gap-2 text-2xl font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+        <a href="/landingPage" class="flex items-center gap-2 text-2xl font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
                 <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                 <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                 <path d="M4 22h16"></path>
@@ -127,18 +131,21 @@
         </a>
         <nav class="hidden md:flex items-center gap-6">
             <a href="/landingPage" class="text-sm font-medium transition-colors hover:text-primary">Home</a>
-            <a href="/teams" class="text-sm font-medium transition-colors hover:text-primary">Teams</a>
             <a href="/matchups" class="text-sm font-medium transition-colors hover:text-primary">Matchups</a>
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
-            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="text-sm font-medium transition-colors hover:text-primary">Create Team</a>
-            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Login</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile"
+               class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
+            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login"
+               class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Login</a>
             <form id="logout-form" th:action="@{/logout}" method="post" style="display: none;">
                 <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             </form>
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90">Logout</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="#"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+               class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90">Logout</a>
         </nav>
         <button class="inline-flex items-center justify-center rounded-md border border-input bg-background p-2 text-sm font-medium shadow-sm md:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
                 <line x1="4" x2="20" y1="12" y2="12"></line>
                 <line x1="4" x2="20" y1="6" y2="6"></line>
                 <line x1="4" x2="20" y1="18" y2="18"></line>
@@ -150,19 +157,26 @@
 <!-- Main Content -->
 <main class="container py-6 md:py-10">
     <div class="flex flex-col gap-2 mb-8">
-        <h1 class="text-3xl font-bold tracking-tight">Teams Management</h1>
-        <p class="text-muted-foreground">View and manage all teams in the E&F League</p>
+        <h1 class="text-3xl font-bold tracking-tight">Teams</h1>
+        <p th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="text-muted-foreground">View and manage all teams in the E&F League</p>
+
     </div>
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold">Teams</h1>
+    <div th:if="${message}" class="p-4 mb-4 text-green-800 bg-green-200 rounded-lg">
+        <p th:text="${message}"></p>
+    </div>
+    <!-- Display error message -->
+    <div th:if="${error}" class="p-4 mb-4 text-red-800 bg-red-200 rounded-lg">
+        <p th:text="${error}"></p>
+    </div>
+    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="flex justify-between items-center">
         <!-- Pending Teams Button -->
-        <button data-modal-target="#pending-teams-modal" data-modal-toggle="pending-teams-modal"
+        <button data-modal-target="pending-teams-modal" data-modal-toggle="pending-teams-modal"
                 class="px-4 py-2 border m-2 border-black text-black hover:text-white hover:bg-black transition-colors duration-200">
             Pending Teams
         </button>
 
         <!-- Create Team Button -->
-        <button data-modal-target="#create-team-modal" data-modal-toggle="create-team-modal"
+        <button data-modal-target="create-team-modal" data-modal-toggle="create-team-modal"
                 class="px-4 py-2 border m-2 border-black text-black hover:text-white hover:bg-black transition-colors duration-200">
             + Create Team
         </button>
@@ -174,12 +188,13 @@
             <div class="p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-semibold leading-none tracking-tight" th:text="${team.name}">Team Name</h2>
-                    <span th:text="${team.status}" th:class="${team.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'} + ' px-2 py-1 rounded-full text-xs font-medium'">
+                    <span th:text="${team.status}"
+                          th:class="${team.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'} + ' px-2 py-1 rounded-full text-xs font-medium'">
                             Status
                         </span>
                 </div>
                 <p class="text-sm text-muted-foreground">Team description or additional information can go here.</p>
-                <small th:text="${team.captain != null ? team.captain.username : 'No Captain'}">Captain: Abdi</small>
+                <h3 th:text="'Captain: ' + ${team.captain.username}"></h3>
                 <div class="flex items-center justify-between pt-4">
                     <a th:href="@{/teams/{teamId}/edit(teamId=${team.id})}"
                        class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-9 px-4 py-2 text-sm font-medium shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
@@ -197,7 +212,6 @@
 </main>
 
 
-
 <!-- Pending Teams Modal -->
 <div id="pending-teams-modal" tabindex="-1" aria-hidden="true"
      class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -205,7 +219,8 @@
         <div class="flex justify-between items-center">
             <h2 class="text-2xl font-bold">Pending Teams</h2>
             <button data-modal-hide="pending-teams-modal"
-                    class="text-gray-600 hover:text-gray-900 text-xl">&times;</button>
+                    class="text-gray-600 hover:text-gray-900 text-xl">&times;
+            </button>
         </div>
         <div class="py-4">
             <table class="w-full border-collapse border border-gray-300">
@@ -216,7 +231,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="team : ${pendingTeams}">
+                <tr class="px-4" th:each="team : ${pendingTeams}">
                     <td class="border border-gray-300 px-4 py-2" th:text="${team.name}"></td>
                     <td class="border border-gray-300 px-4 py-2">
                         <form th:action="@{/teams/{teamId}/approve(teamId=${team.id})}" method="post">
@@ -238,7 +253,6 @@
 </div>
 
 
-
 <!-- Create Team Modal -->
 <div id="create-team-modal" tabindex="-1" aria-hidden="true"
      class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -246,11 +260,15 @@
         <div class="flex justify-between items-center">
             <h2 class="text-2xl font-bold">Create New Team</h2>
             <button data-modal-hide="create-team-modal"
-                    class="text-gray-600 hover:text-gray-900 text-xl">&times;</button>
+                    class="text-gray-600 hover:text-gray-900 text-xl">&times;
+            </button>
         </div>
 
-        <form th:action="@{/teams/create}" method="post" th:object="${team}" class="space-y-4 mt-4">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <!-- Error Message (Dynamically Updated) -->
+        <div id="team-error-message" class="hidden p-4 mb-4 text-red-800 bg-red-200 rounded-lg"></div>
+
+        <form id="create-team-form" class="space-y-4 mt-4">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrfToken"/>
 
             <div>
                 <label for="teamName" class="block text-gray-700 text-sm font-semibold">Team Name:</label>
@@ -261,15 +279,16 @@
 
             <div>
                 <label for="captainId" class="block text-gray-700 text-sm font-semibold">Assign Captain:</label>
-                <select id="captainId" th:field="*{captain}" name="captainId"
+                <select id="captainId" name="captainId"
                         class="w-full p-3 border rounded-lg focus:ring focus:ring-indigo-300">
                     <option value="" disabled selected>-- Select Captain --</option>
-                    <option th:each="captain : ${captains}" th:value="${captain.id}" th:text="${captain.username}"></option>
+                    <option th:each="captain : ${captains}" th:value="${captain.id}"
+                            th:text="${captain.username}"></option>
                 </select>
             </div>
 
             <div class="flex justify-center">
-                <button type="submit"
+                <button type="submit" id="create-team-btn"
                         class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
                     Create Team
                 </button>
@@ -279,7 +298,51 @@
 </div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.1.0/flowbite.min.js"></script>
+<script src="/flowbite/flowbite.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const createTeamForm = document.getElementById("create-team-form");
+        const errorMessage = document.getElementById("team-error-message");
+        const createTeamModal = document.getElementById("create-team-modal");
 
+        createTeamForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent normal form submission
+
+            const teamName = document.getElementById("teamName").value;
+            const captainId = document.getElementById("captainId").value;
+            const csrfToken = document.getElementById("csrfToken").value;
+
+            // Send AJAX Request
+            fetch("/teams/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-TOKEN": csrfToken
+                },
+                body: `name=${encodeURIComponent(teamName)}&captainId=${encodeURIComponent(captainId)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close the modal
+                        createTeamModal.classList.add("hidden");
+
+                        // Refresh the teams list without reloading the page
+                        location.reload();
+                    } else {
+                        // Show the error message dynamically
+                        errorMessage.textContent = data.message;
+                        errorMessage.classList.remove("hidden");
+                    }
+                })
+                .catch(error => {
+                    errorMessage.textContent = "An error occurred. Please try again.";
+                    errorMessage.classList.remove("hidden");
+                });
+        });
+    });
+
+
+</script>
 </body>
 </html>

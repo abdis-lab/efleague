@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,15 @@ public class Season {
     @Column(unique = true)
     private String name;
 
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
     private boolean active;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "season", cascade = CascadeType.ALL)
     private List<Matchup> matchups = new ArrayList<>();
 

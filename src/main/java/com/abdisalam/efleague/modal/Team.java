@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +27,12 @@ public class Team {
     @Size(min = 2, max = 50, message = "Team name must be between 2 and 50.")
     private String name;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "captain_id")
     private User captain;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "team",fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     //@JoinColumn(name = "team_id")
     private List<User> userPlayers = new ArrayList<>();

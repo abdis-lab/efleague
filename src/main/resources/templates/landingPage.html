@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:x-transition="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,7 +129,7 @@
             <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/users/manage" class="text-sm font-medium transition-colors hover:text-primary">Manage Users</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/signup" class="text-sm font-medium transition-colors hover:text-primary">Sign Up</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="text-sm font-medium transition-colors hover:text-primary">Login</a>
-            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/matchups/upcoming" class="text-sm font-medium transition-colors hover:text-primary">View Matchups</a>
             <form id="logout-form" th:action="@{/logout}" method="post" class="hidden">
                 <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             </form>
@@ -171,67 +171,168 @@
 <!-- Next Match Carousel Section -->
 <section id="fixtures" class="py-24 bg-muted">
     <div class="container">
-        <h2 class="text-3xl font-bold tracking-tight text-center sm:text-4xl mb-12">Next Matches</h2>
-        <div class="relative" x-data="{ activeSlide: 1 }" x-init="setInterval(() => { activeSlide = activeSlide === 2 ? 1 : 2 }, 5000)">
-            <!-- Carousel Item 1 -->
-            <div x-show="activeSlide === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-90" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-90" class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
-                <div class="flex-1 text-center">
-                    <img src="https://via.placeholder.com/150" alt="Team A logo" class="mx-auto mb-4 rounded-full" />
-                    <h3 class="text-2xl font-bold">Team A</h3>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Upcoming Matches</h2>
+
+            <!-- Modern Week Selection Dropdown -->
+            <form method="get" th:action="@{/landingPage}" class="w-full md:w-auto">
+                <div class="custom-select">
+                    <select id="selectedRound"
+                            name="round"
+                            onchange="this.form.submit()"
+                            class="font-medium">
+                        <option value="">All Weeks</option>
+                        <option th:each="r : ${allRounds}"
+                                th:value="${r}"
+                                th:text="'Week ' + ${r}"
+                                th:selected="${r} == ${selectedRound}"
+                                class="week-option">
+                        </option>
+                    </select>
                 </div>
-                <div class="flex-1 bg-card p-8 rounded-lg shadow-lg">
-                    <p class="text-lg font-semibold text-muted-foreground mb-2">Sunday, October 29th, 2023</p>
-                    <h4 class="text-3xl font-bold mb-4">8:00 PM</h4>
-                    <p class="text-lg text-muted-foreground mb-6">Sports Arena, City</p>
-                    <a href="#" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
-                        View Fixture
-                    </a>
-                </div>
-                <div class="flex-1 text-center">
-                    <img src="https://via.placeholder.com/150" alt="Team B logo" class="mx-auto mb-4 rounded-full" />
-                    <h3 class="text-2xl font-bold">Team B</h3>
+            </form>
+        </div>
+
+        <!-- Carousel Container -->
+        <div th:if="${!#lists.isEmpty(matchups)}"
+             x-data="carouselData()"
+             class="relative bg-card rounded-2xl shadow-xl overflow-hidden border group"
+             x-cloak>
+
+            <!-- Hidden slides container -->
+            <div x-ref="slides" class="hidden">
+                <div th:each="matchup : ${matchups}">
+                    <div class="p-8 flex flex-col items-center gap-6 fade-in">
+                        <!-- Matchup content remains unchanged -->
+                        <!-- Header -->
+                        <div class="text-center space-y-1">
+                            <h2 class="text-2xl font-bold text-card-foreground">
+                                <span th:text="'WEEK ' + ${selectedRound}"></span>
+                            </h2>
+                            <p class="text-muted-foreground text-sm font-medium"
+                               th:text="${#temporals.format(matchup.gameDateTime, 'EEEE, MMM d yyyy - HH:mm')}">
+                            </p>
+                        </div>
+
+
+                        <!-- Teams -->
+                        <div class="flex items-center justify-center gap-12 mt-4">
+                            <!-- Home Team -->
+                            <div class="team-card text-center space-y-4">
+                                <div class="relative">
+                                    <img src="/images/default-team.png"
+                                         alt="Home Team Logo"
+                                         class="team-logo w-32 h-32 rounded-full mx-auto border-4 border-card shadow-lg transition-transform">
+                                </div>
+                                <div>
+                                    <p class="text-xl font-bold text-card-foreground"
+                                       th:text="${matchup.homeTeam.name}"></p>
+                                    <span class="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full">
+                                        Home Team
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="text-3xl font-bold text-muted-foreground mx-4">VS</div>
+
+                            <!-- Away Team -->
+                            <div class="team-card text-center space-y-4">
+                                <div class="relative">
+                                    <img src="/images/default-team.png"
+                                         alt="Away Team Logo"
+                                         class="team-logo w-32 h-32 rounded-full mx-auto border-4 border-card shadow-lg transition-transform">
+                                </div>
+                                <div>
+                                    <p class="text-xl font-bold text-card-foreground"
+                                       th:text="${matchup.awayTeam.name}"></p>
+                                    <span class="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full">
+                                        Away Team
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date Pill -->
+                        <div class="mt-6 px-6 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                            <span th:text="${#temporals.format(matchup.gameDateTime, 'EEEE, MMM d yyyy')}"></span>
+                            <span class="mx-2">•</span>
+                            <span th:text="${#temporals.format(matchup.gameDateTime, 'HH:mm')}"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- Carousel Item 2 -->
-            <div x-show="activeSlide === 2" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-90" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-90" class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
-                <div class="flex-1 text-center">
-                    <img src="https://via.placeholder.com/150" alt="Team C logo" class="mx-auto mb-4 rounded-full" />
-                    <h3 class="text-2xl font-bold">Team C</h3>
+
+            <!-- Active Slide Display -->
+            <template x-for="(slide, index) in slides" :key="index">
+                <div class="p-6" x-show="activeSlide === index" x-transition:enter.opacity.duration.300>
+                    <div x-html="slide.innerHTML"></div>
                 </div>
-                <div class="flex-1 bg-card p-8 rounded-lg shadow-lg">
-                    <p class="text-lg font-semibold text-muted-foreground mb-2">Saturday, November 5th, 2023</p>
-                    <h4 class="text-3xl font-bold mb-4">6:00 PM</h4>
-                    <p class="text-lg text-muted-foreground mb-6">Stadium Name, City</p>
-                    <a href="#" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
-                        View Fixture
-                    </a>
-                </div>
-                <div class="flex-1 text-center">
-                    <img src="https://via.placeholder.com/150" alt="Team D logo" class="mx-auto mb-4 rounded-full" />
-                    <h3 class="text-2xl font-bold">Team D</h3>
-                </div>
+            </template>
+
+            <!-- Navigation Buttons with hover effect -->
+            <button @click="prevSlide()"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all border opacity-0 group-hover:opacity-100 hover:shadow-md">
+                <svg class="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <button @click="nextSlide()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all border opacity-0 group-hover:opacity-100 hover:shadow-md">
+                <svg class="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+
+            <!-- Dots Indicator -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                <template x-for="(_, index) in slides" :key="index">
+                    <button @click="activeSlide = index"
+                            class="w-3 h-3 rounded-full transition-all duration-300"
+                            :class="activeSlide === index ? 'bg-primary w-6' : 'bg-muted-foreground/30'">
+                    </button>
+                </template>
             </div>
-            <!-- Slider controls -->
-            <button @click="activeSlide = activeSlide === 1 ? 2 : 1" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/30 hover:bg-white/50 rounded-full p-2 focus:outline-none">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </button>
-            <button @click="activeSlide = activeSlide === 1 ? 2 : 1" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/30 hover:bg-white/50 rounded-full p-2 focus:outline-none">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
+        </div>
+
+        <!-- No Matches Message -->
+        <div th:if="${#lists.isEmpty(matchups)}" class="text-center py-16">
+            <div class="text-muted-foreground text-xl">🏀 No matches found</div>
+            <p class="text-muted-foreground mt-2">Try selecting a different week</p>
         </div>
     </div>
 </section>
-
+<!-- Existing footer remains unchanged -->
+<footer class="bg-background border-t py-12 text-center">
+    <!-- ... -->
+</footer>
 <!-- Footer -->
 <footer class="bg-background border-t py-12 text-center">
     <div class="container">
         <p class="text-muted-foreground">&copy; 2024 E&F League. All rights reserved.</p>
     </div>
 </footer>
+
+
+
+<script>
+    // Add carousel functionality
+    function carouselData() {
+        return {
+            activeSlide: 0,
+            slides: [],
+            init() {
+                this.slides = Array.from(this.$refs.slides.children);
+                setInterval(() => this.nextSlide(), 5000);
+            },
+            nextSlide() {
+                this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+            },
+            prevSlide() {
+                this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length;
+            }
+        }
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>

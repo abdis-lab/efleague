@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -36,7 +37,7 @@ public class Matchup {
     private Integer homeTeamScore;
     private Integer awayTeamScore;
 
-
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "season_id")
     private Season season;
@@ -44,6 +45,8 @@ public class Matchup {
 
     @Enumerated(EnumType.STRING)
     private GameResult result;
+
+    private int round;
 
 
     public enum GameResult{

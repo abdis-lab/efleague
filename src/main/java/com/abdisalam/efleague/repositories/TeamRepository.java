@@ -17,4 +17,8 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("SELECT t FROM Team t WHERE t.status = com.abdisalam.efleague.modal.Team.Status.PENDING")
     List<Team> findPendingTeams();
 
+    @Query("SELECT t FROM Team t WHERE t.status = com.abdisalam.efleague.modal.Team.Status.APPROVED")
+    List<Team> findApprovedTeams();
+
+    List<Team> findByStatus(com.abdisalam.efleague.modal.Team.Status status);
 }

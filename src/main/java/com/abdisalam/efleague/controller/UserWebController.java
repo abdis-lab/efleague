@@ -84,7 +84,7 @@ public class UserWebController {
 
         emailService.sendCommissionerNotification(
                 "New User Registered: " + user.getUsername(),
-                user.getEmail(),   // <-- Now this will work ✅
+                user.getEmail(),
                 user.getUsername(),
                 user.getRole().name(),
                 user.getTeamPreference()

@@ -10,7 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -33,8 +35,9 @@ public class TeamsController {
 
 
         model.addAttribute("teams", teams);
+        model.addAttribute("team", new Team());
         model.addAttribute("pendingTeams", pendingTeams);
-        model.addAttribute("captain", captains);
+        model.addAttribute("captains", captains);
         return "teams";
     }
 
@@ -48,7 +51,10 @@ public class TeamsController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public String createTeam(@ModelAttribute("team") Team team, @RequestParam Long captainId, Model model) {
+    @ResponseBody
+    public Map<String, Object> createTeam(@ModelAttribute("team") Team team, @RequestParam Long captainId) {
+        Map<String, Object> result = new HashMap<>();
+
         try {
             Optional<User> captainOpt = userService.findUserById(captainId);
             if (captainOpt.isEmpty()) {
@@ -59,11 +65,13 @@ public class TeamsController {
             team.setStatus(Team.Status.PENDING);
             teamService.saveTeam(team);
 
-            return "redirect:/teams";
+            result.put("success", true);
+            result.put("message", "Team created Successfully!");
         } catch (IllegalStateException e) {
-            model.addAttribute("error", e.getMessage());
-            return "teams";
+            result.put("success", false);
+            result.put("message", e.getMessage());
         }
+        return result;
     }
 
     @GetMapping("/{teamId}/edit")
@@ -115,12 +123,7 @@ public class TeamsController {
         return "redirect:/teams/" + teamId + "/edit";
     }
 
-    @GetMapping("/pending")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String getPendingTeams(Model model) {
-        model.addAttribute("pendingTeams", teamService.getPendingTeams());
-        return "team-approval";
-    }
+
 
     @PostMapping("/{teamId}/approve")
     @PreAuthorize("hasRole('ADMIN')")

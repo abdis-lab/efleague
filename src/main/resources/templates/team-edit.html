@@ -129,7 +129,6 @@
             <a href="/teams" class="text-sm font-medium transition-colors hover:text-primary">Teams</a>
             <a href="/matchups" class="text-sm font-medium transition-colors hover:text-primary">Matchups</a>
             <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile" class="text-sm font-medium transition-colors hover:text-primary">Profile</a>
-            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams/create" class="text-sm font-medium transition-colors hover:text-primary">Create Team</a>
             <a th:if="${#authorization.expression('isAuthenticated()')}" href="/logout" class="inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow hover:bg-destructive/90">Logout</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Login</a>
         </nav>

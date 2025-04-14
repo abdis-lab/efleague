@@ -35,7 +35,7 @@ public class TeamService {
         List<Team> currentTeams = teamRepository.findAll();
 
         if(currentTeams.size() >= MAX_TEAMS){
-            throw new IllegalStateException("Maximum number of teams (12)");
+            throw new IllegalStateException("Maximum team limit reached!! You can only craete " + MAX_TEAMS + " teams.");
         }
 
         Optional<User> captainOpt = userRepository.findById(team.getCaptain().getId());
@@ -119,6 +119,17 @@ public class TeamService {
         if (newCaptain.getRole() != User.Role.ROLE_CAPTAIN) {
             throw new IllegalStateException("Selected user is not a captain!");
         }
+
+        Optional<Team> existingTeam = teamRepository.findAll()
+                .stream()
+                .filter(t -> t.getCaptain() != null && t.getCaptain().getId().equals(captainId) && !t.getId().equals(teamId))
+                .findFirst();
+
+
+        if(existingTeam.isPresent()){
+            throw new IllegalStateException("Team is already assigned to a captain: " + existingTeam.get().getCaptain().getId());
+        }
+
 
         // If a captain already exists, remove them
         if (team.getCaptain() != null) {
@@ -208,34 +219,6 @@ public class TeamService {
             throw new IllegalStateException("Team not found!");
         }
     }
-
-
-    //Testing teams
-    @PostConstruct
-    public void initializeTestTeams(){
-        if(teamRepository.findAll().isEmpty()){
-
-            User captain1 = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("Captain cannot be found!"));
-            User captain2 = userRepository.findById(2L).orElseThrow(() -> new RuntimeException("Captain cannot be found!"));
-
-
-            Team team1 = new Team();
-            team1.setName("The Hoopers");
-            team1.setCaptain(captain1);
-            team1.setStatus(Team.Status.PENDING);
-            teamRepository.save(team1);
-
-
-            Team team2 = new Team();
-            team2.setName("Fast Breakers");
-            team2.setCaptain(captain2);
-            team2.setStatus(Team.Status.PENDING);
-            teamRepository.save(team2);
-
-
-        }
-    }
-
 
 
 

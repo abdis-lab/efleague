@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seasons</title>
+</head>
+<body>
+<h1>Seasons</h1>
+
+<a href="/seasons/create">Create New Season</a>
+
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Active</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="season : ${seasons}">
+    <td th:text="${season.name}"></td>
+    <td th:text="${season.active ? 'Yes' : 'No'}"></td>
+    <td>
+      <form th:action="@{'/seasons/activate/' + ${season.id}}" method="post">
+        <button type="submit" th:disabled="${season.active}">Activate</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

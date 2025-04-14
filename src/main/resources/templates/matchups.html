@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:x-transition="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <title>Matchups Carousel</title>
+
+    <!-- Tailwind CSS via CDN (example) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="/">
+
+    <!-- Alpine.js for reactivity -->
+    <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
+
+    <style>
+        /* You can add or refine styling here if needed */
+    </style>
+</head>
+<body >
+
+<!-- Week Selection Form -->
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <form method="get" th:action="@{/matchups}" class="mb-12">
+        <div class="flex items-center space-x-4">
+            <label for="selectedRound" class="text-lg font-bold text-slate-700">Select Week:</label>
+            <select id="selectedRound"
+                    name="round"
+                    onchange="this.form.submit()"
+                    class="px-6 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-700
+                           focus:border-blue-500 focus:ring-0 transition-all cursor-pointer
+                           hover:border-slate-300">
+                <option value="">All Weeks</option>
+                <option th:each="r : ${allRounds}"
+                        th:value="${r}"
+                        th:text="'Week ' + ${r}"
+                        th:selected="${r} == ${selectedRound}">
+                </option>
+            </select>
+        </div>
+    </form>
+
+    <div th:if="${#lists.isEmpty(matchups)}" class="text-center py-16">
+        <div class="text-slate-400 text-xl">⚽ No matchups found</div>
+        <p class="text-slate-400 mt-2">Select a week to view matches</p>
+    </div>
+
+    <!-- Carousel Container -->
+    <div th:if="${!#lists.isEmpty(matchups)}"
+         x-data="carouselData()"
+         class="relative bg-white rounded-2xl shadow-xl overflow-hidden
+                border border-slate-100 hover:shadow-2xl transition-shadow"
+         x-cloak>
+
+        <!-- Hidden slides -->
+        <div x-ref="slides" class="hidden">
+            <div th:each="matchup : ${matchups}">
+                <div class="p-8 flex flex-col items-center gap-6 fade-in">
+                    <!-- Header -->
+                    <div class="text-center space-y-1">
+                        <h2 class="text-2xl font-bold text-slate-800">
+                            <span th:text="'WEEK ' + ${matchup.round}"></span>
+                        </h2>
+                        <p class="text-slate-500 text-sm font-medium"
+                           th:text="${#temporals.format(matchup.gameDateTime, 'EEEE, MMM d yyyy - HH:mm')}">
+                        </p>
+                    </div>
+
+                    <!-- Teams -->
+                    <div class="flex items-center justify-center gap-12 mt-4">
+                        <!-- Home Team -->
+                        <div class="team-card text-center space-y-4">
+                            <div class="relative">
+                                <img src="/images/default-team.png"
+                                     alt="Home Team Logo"
+                                     class="team-logo w-32 h-32 rounded-full mx-auto
+                                            border-4 border-white shadow-lg transition-transform">
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-slate-800"
+                                   th:text="${matchup.homeTeam.name}"></p>
+                                <span class="text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                                    Home Team
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-3xl font-bold text-slate-400 mx-4">VS</div>
+
+                        <!-- Away Team -->
+                        <div class="team-card text-center space-y-4">
+                            <div class="relative">
+                                <img src="/images/default-team.png"
+                                     alt="Away Team Logo"
+                                     class="team-logo w-32 h-32 rounded-full mx-auto
+                                            border-4 border-white shadow-lg transition-transform">
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-slate-800"
+                                   th:text="${matchup.awayTeam.name}"></p>
+                                <span class="text-sm text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                                    Away Team
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Pill -->
+                    <div class="mt-6 px-6 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
+                        <span th:text="${#temporals.format(matchup.gameDateTime, 'EEEE, MMM d yyyy')}"></span>
+                        <span class="mx-2">•</span>
+                        <span th:text="${#temporals.format(matchup.gameDateTime, 'HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Slide -->
+        <template x-for="(slide, index) in slides" :key="index">
+            <div class="p-6" x-show="activeSlide === index" x-transition:enter.opacity.duration.300>
+                <div x-html="slide.innerHTML"></div>
+            </div>
+        </template>
+
+        <!-- Navigation -->
+        <button @click="prevSlide()"
+                class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm
+                       p-3 rounded-full shadow-lg hover:bg-white transition-colors
+                       border border-slate-200 hover:shadow-xl">
+            <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <button @click="nextSlide()"
+                class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm
+                       p-3 rounded-full shadow-lg hover:bg-white transition-colors
+                       border border-slate-200 hover:shadow-xl">
+            <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <!-- Dots Indicator -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+            <template x-for="(_, index) in slides" :key="index">
+                <button @click="activeSlide = index"
+                        class="w-2.5 h-2.5 rounded-full transition-colors"
+                        :class="activeSlide === index ? 'bg-blue-500' : 'bg-slate-300'">
+                </button>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+    function carouselData() {
+        return {
+            activeSlide: 0,
+            slides: [],
+            init() {
+                this.slides = Array.from(this.$refs.slides.children);
+                // Auto-advance every 5 seconds (optional)
+                setInterval(() => this.nextSlide(), 5000);
+            },
+            nextSlide() {
+                this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+            },
+            prevSlide() {
+                this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length;
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

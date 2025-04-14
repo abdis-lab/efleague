@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:x-transition="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly</title>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen p-6">
+
+<h1 class="text-2xl font-bold mb-6">Weekly Matchups</h1>
+
+<form method="get" th:action="@{/matchups/upcoming}">
+    <label for="roundSelect">Select Week:</label>
+    <select id="roundSelect" name="round" onchange="this.form.submit()">
+        <option value="">All Weeks</option>
+        <option th:each="r : ${allRounds}" th:value="${r}" th:text="'Week ' + ${r}"></option>
+    </select>
+</form>
+
+
+
+
+<!-- If there are no matchups, show a message -->
+<div th:if="${#maps.isEmpty(matchupsByRound)}">
+    <p>No matchups found. (Have you generated them?)</p>
+</div>
+
+<!-- If we have data, let's iterate over them -->
+<div th:each="entry : ${matchupsByRound}">
+    <table class="min-w-full bg-white border border-gray-300 shadow">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="py-2 px-4 border">Round #</th>
+                <th class="py-2 px-4 border">Home Team</th>
+                <th class="py-2 px-4 border">Away Team</th>
+                <th class="py-2 px-4 border">Date</th>
+                <th class="py-2 px-4 border">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop over each round entry -->
+            <tr th:each="matchup, iterStat : ${matchupsByRound}">
+                <!-- Round Header Row -->
+                <td class="py-2 px-4 font-bold bg-gray-100 border text-center" colspan="5">
+                    Round <span th:text="${iterStat.index + 1}">1</span>
+                </td>
+            </tr>
+
+            <!-- Nested loop: matchups inside the current round -->
+            <tr th:each="match : ${entry.value}">
+                <td></td>
+                <td th:text="${match.homeTeam != null ? match.homeTeam.name : 'BYE'}" class="py-2 px-4 border">HomeTeam</td>
+                <td th:text="${match.awayTeam != null ? match.awayTeam.name : 'BYE'}" class="py-2 px-4 border">AwayTeam</td>
+                <td th:text="${#temporals.format(match.gameDateTime, 'yyyy-MM-dd')}" class="py-2 px-4 border">2025-04-14</td>
+                <td th:text="${#temporals.format(match.gameDateTime, 'hh:mm a')}" class="py-2 px-4 border">08:00 AM</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

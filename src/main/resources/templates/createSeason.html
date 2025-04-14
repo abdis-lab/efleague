@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create A Season</title>
+</head>
+<body>
+<h1>Create New Season</h1>
+<form th:action="@{/seasons/create}" th:object="${season}" method="post">
+    <label>Name: </label>
+    <input type="text" th:field="*{name}" required />
+    <br/>
+
+    <!-- Optional -->
+    <label>Start Date:</label>
+    <input type="date" th:field="*{startDate}" />
+    <br/>
+    <label>End Date:</label>
+    <input type="date" th:field="*{endDate}" />
+    <br/>
+
+    <button type="submit">Create Season</button>
+</form>
+</body>
+</html>
