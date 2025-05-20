@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
 
                         .loginPage("/users/login")//Custom login Page
+                        .loginProcessingUrl("users/login")
                         .defaultSuccessUrl("/landingPage", true)
                         .permitAll()
                 )

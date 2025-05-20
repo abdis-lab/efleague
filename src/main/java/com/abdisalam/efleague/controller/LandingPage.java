@@ -43,7 +43,7 @@ public class LandingPage {
     @GetMapping("/landingPage")
     public String showLandingPage(
             Model model,
-            @RequestParam(name = "round", required = false) Integer round){
+            @RequestParam(name = "round", required = false, defaultValue = "1") Integer round){
 
 
         log.info("User selected round = {}", round);
