@@ -156,8 +156,6 @@ public class TeamsController {
 
 
 
-
-
     @PostMapping("/{teamId}/assign-captain")
     @PreAuthorize("hasRole('ADMIN')")
     public String assignCaptain(@PathVariable Long teamId, @RequestParam Long captainId, RedirectAttributes redirectAttributes){
@@ -167,7 +165,7 @@ public class TeamsController {
         }catch (IllegalStateException e){
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-       return "redirect:/teams/" + teamId + "/edit";
+       return "redirect:/teams/edit";
 
     }
 

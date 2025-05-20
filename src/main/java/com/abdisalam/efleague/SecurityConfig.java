@@ -35,7 +35,7 @@ public class SecurityConfig {
 
         httpSecurity
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/landingPage", "/landingPage/**","/test-email","/images/**","/matchups/**","/webjars/**", "/users/login", "/users/signup", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/landingPage", "/landingPage/**","/test-email","/images/**","/webjars/**", "/users/login", "/users/signup", "/css/**", "/js/**").permitAll()
 
                         //Only captains and admins can create and manage teams
                         .requestMatchers("/teams/create").hasAnyRole("ADMIN")
