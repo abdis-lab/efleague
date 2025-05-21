@@ -19,4 +19,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByTeamIsNull();
 
 
+    @Query("SELECT u FROM User u WHERE u.team IS NOT NULL AND u.role = 'ROLE_PLAYER'")
+    List<User> findByTeamIsNotNull();
+
+
+    List<User> findByTeamId(Long teamId);
+
 }

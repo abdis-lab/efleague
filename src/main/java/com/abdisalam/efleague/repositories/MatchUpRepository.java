@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatchUpRepository extends JpaRepository<Matchup, Long> {
@@ -31,4 +32,11 @@ public interface MatchUpRepository extends JpaRepository<Matchup, Long> {
 
 
     List<Matchup> findByRound(int round);
+
+
+
+    // assumes Matchup has fields homeTeam, awayTeam (of type Team) and gameDateTime
+    Optional<Matchup> findFirstByHomeTeamOrAwayTeamAndGameDateTimeAfterOrderByGameDateTimeAsc(
+            Team homeTeam, Team awayTeam, LocalDateTime now);
+
 }

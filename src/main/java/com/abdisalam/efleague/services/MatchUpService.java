@@ -112,4 +112,11 @@ public class MatchUpService {
         return matchUpRepository.findByRound(round);
     }
 
+    public Matchup getNextMatchupFor(Team team){
+        return matchUpRepository
+                .findFirstByHomeTeamOrAwayTeamAndGameDateTimeAfterOrderByGameDateTimeAsc(
+                        team, team, LocalDateTime.now())
+                .orElse(null);
+    }
+
 }

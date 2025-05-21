@@ -1,7 +1,9 @@
 package com.abdisalam.efleague.controller;
 
+import com.abdisalam.efleague.modal.Matchup;
 import com.abdisalam.efleague.modal.Team;
 import com.abdisalam.efleague.modal.User;
+import com.abdisalam.efleague.services.MatchUpService;
 import com.abdisalam.efleague.services.TeamService;
 import com.abdisalam.efleague.services.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,26 +24,26 @@ public class TeamsController {
 
     private final TeamService teamService;
     private final UserService userService;
+    private final MatchUpService matchUpService;
 
-    public TeamsController(TeamService teamService, UserService userService) {
+    public TeamsController(MatchUpService matchUpService,TeamService teamService, UserService userService) {
         this.teamService = teamService;
         this.userService = userService;
+        this.matchUpService = matchUpService;
     }
 
-    @GetMapping
-    public String getAllTeams(Model model) {
-        List<Team> teams = teamService.getAllTeams();
-        List<Team> pendingTeams = teamService.getPendingTeams();
-        List<User> captains = userService.getAllCaptain();
-
-
-        model.addAttribute("teams", teams);
-        model.addAttribute("team", new Team());
-        model.addAttribute("pendingTeams", pendingTeams);
-        model.addAttribute("captains", captains);
-        return "teams";
+    // ─── 1) ADMIN: list all teams ───────────────────────────────────────────────────
+    @GetMapping             // GET /teams
+    @PreAuthorize("hasRole('ADMIN')")
+    public String listAllTeams(Model model) {
+        model.addAttribute("teams", teamService.getAllTeams());
+        model.addAttribute("pendingTeams", teamService.getPendingTeams());
+        model.addAttribute("captains", userService.getAllCaptain());
+        model.addAttribute("team", new Team()); // for your create form
+        return "teams";      // src/main/resources/templates/teams.html
     }
 
+    // ─── 2) ADMIN: show create form ───────────────────────────────────────────────
     @GetMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public String showCreateTeamForm(Model model) {
@@ -49,22 +52,19 @@ public class TeamsController {
         return "teams";
     }
 
+    // ─── 3) ADMIN: handle create (AJAX) ───────────────────────────────────────────
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
-    public Map<String, Object> createTeam(@ModelAttribute("team") Team team, @RequestParam Long captainId) {
+    public Map<String, Object> createTeam(@ModelAttribute Team team,
+                                          @RequestParam Long captainId) {
         Map<String, Object> result = new HashMap<>();
-
         try {
-            Optional<User> captainOpt = userService.findUserById(captainId);
-            if (captainOpt.isEmpty()) {
-                throw new IllegalStateException("Captain not found!");
-            }
-
-            team.setCaptain(captainOpt.get());
+            User captain = userService.findUserById(captainId)
+                    .orElseThrow(() -> new IllegalStateException("Captain not found"));
+            team.setCaptain(captain);
             team.setStatus(Team.Status.PENDING);
             teamService.saveTeam(team);
-
             result.put("success", true);
             result.put("message", "Team created Successfully!");
         } catch (IllegalStateException e) {
@@ -74,57 +74,40 @@ public class TeamsController {
         return result;
     }
 
+    // ─── 4) ADMIN: edit form ───────────────────────────────────────────────────────
     @GetMapping("/{teamId}/edit")
     @PreAuthorize("hasRole('ADMIN')")
     public String showEditTeamForm(@PathVariable Long teamId, Model model) {
-        Optional<Team> teamOpt = teamService.findTeamById(teamId);
-        if (teamOpt.isPresent()) {
-            Team team = teamOpt.get();
-
-            // Prevent editing rejected teams
-            if (team.getStatus() == Team.Status.REJECTED) {
-                model.addAttribute("error", "Rejected teams cannot be edited.");
-                return "error";
-            }
-
-            List<User> availablePlayers = userService.getUnassignedPlayers();
-            List<User> availableCaptains = userService.getAllCaptain();
-            System.out.println("Available Players: " + availablePlayers);
-
-
-
-
-            model.addAttribute("team", team);
-            model.addAttribute("captains", availableCaptains);
-            model.addAttribute("players", availablePlayers);
-            return "team-edit";
-        } else {
-            model.addAttribute("error", "Team not found");
+        Team team = teamService.findTeamById(teamId)
+                .orElseThrow(() -> new IllegalStateException("Team not found"));
+        if (team.getStatus() == Team.Status.REJECTED) {
+            model.addAttribute("error", "Rejected teams cannot be edited.");
             return "error";
         }
+        model.addAttribute("team", team);
+        model.addAttribute("captains", userService.getAllCaptain());
+        model.addAttribute("players", userService.getUnassignedPlayers());
+        return "team-edit";
     }
 
+    // ─── 5) ADMIN: assign/remove players ──────────────────────────────────────────
     @PostMapping("/{teamId}/assign-player")
     @PreAuthorize("hasRole('ADMIN')")
-    public String assignPlayer(@PathVariable Long teamId, @RequestParam Long playerId, Model model) {
-        try {
-            teamService.assignPlayerToTeam(teamId, playerId);
-            return "redirect:/teams/" + teamId + "/edit";
-        } catch (IllegalStateException e) {
-            model.addAttribute("error", e.getMessage());
-            return "team-edit";
-        }
+    public String assignPlayer(@PathVariable Long teamId,
+                               @RequestParam Long playerId) {
+        teamService.assignPlayerToTeam(teamId, playerId);
+        return "redirect:/teams/" + teamId + "/edit";
     }
 
-    @PostMapping("/{teamId}/removePlayer")
+    @PostMapping("/{teamId}/remove-player")
     @PreAuthorize("hasRole('ADMIN')")
-    public String removePlayerFromTeam(@PathVariable Long teamId, @RequestParam Long playerId, Model model) {
+    public String removePlayer(@PathVariable Long teamId,
+                               @RequestParam Long playerId) {
         teamService.removePlayerFromTeam(teamId, playerId);
         return "redirect:/teams/" + teamId + "/edit";
     }
 
-
-
+    // ─── 6) ADMIN: approve/reject/update/delete ──────────────────────────────────
     @PostMapping("/{teamId}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public String approveTeam(@PathVariable Long teamId) {
@@ -139,57 +122,65 @@ public class TeamsController {
         return "redirect:/teams";
     }
 
-
     @PostMapping("/{teamId}/update")
     @PreAuthorize("hasRole('ADMIN')")
-    public String updateTeam(@PathVariable Long teamId, @RequestParam String name, Model model){
-        try{
+    public String updateTeam(@PathVariable Long teamId,
+                             @RequestParam String name, Model model) {
+        try {
             teamService.updateTeam(teamId, name);
             return "redirect:/teams";
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
             return "team-edit";
         }
     }
 
-
-
-
-
     @PostMapping("/{teamId}/assign-captain")
     @PreAuthorize("hasRole('ADMIN')")
-    public String assignCaptain(@PathVariable Long teamId, @RequestParam Long captainId, RedirectAttributes redirectAttributes){
-        try{
+    public String assignCaptain(@PathVariable Long teamId,
+                                @RequestParam Long captainId,
+                                RedirectAttributes attrs) {
+        try {
             teamService.assignCaptainToTeam(teamId, captainId);
-            redirectAttributes.addFlashAttribute("message", "Captain assigned successfully.");
-        }catch (IllegalStateException e){
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            attrs.addFlashAttribute("message", "Captain assigned successfully.");
+        } catch (IllegalStateException e) {
+            attrs.addFlashAttribute("error", e.getMessage());
         }
-       return "redirect:/teams/edit";
-
+        return "redirect:/teams/" + teamId + "/edit";
     }
 
-
-
-
-
-
-
-
     @PostMapping("/{teamId}/delete")
-    @DeleteMapping("/{teamId}/delete")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteTeam(@PathVariable Long teamId){
+    public String deleteTeam(@PathVariable Long teamId) {
         teamService.deleteTeamById(teamId);
         return "redirect:/teams";
     }
 
+    // ─── 7) ANYONE: view a single team’s details ─────────────────────────────────
+    @GetMapping("/{id}")
+    public String showTeam(@PathVariable Long id, Model model) {
+        Team team = teamService.findTeamById(id)
+                .orElseThrow(() -> new IllegalStateException("Team not found"));
+        model.addAttribute("team", team);
+        return "myTeam";   // you can reuse myTeam.html if you like, or make a new one
+    }
 
+    // ─── 8) ANYONE: “My Team” for the logged-in user ───────────────────────────────
+    @GetMapping("/myTeam")
+    public String showMyTeam(Principal principal, Model model) {
+        User me = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
 
+        Team team = me.getTeam();
 
+        Matchup next = (team != null)
+                ? matchUpService.getNextMatchupFor(team)
+                : null;
 
-
-
+        model.addAttribute("team", me.getTeam());
+        model.addAttribute("nextMatchup", next);
+        return "myTeam";         // src/main/resources/templates/myTeam.html
+    }
 }
 
 

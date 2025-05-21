@@ -266,6 +266,9 @@ public class TeamService {
 
 
 
+    public Optional<Team> findById(Long id){
+        return teamRepository.findById(id);
+    }
 
 
 

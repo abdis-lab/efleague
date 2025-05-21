@@ -21,4 +21,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findApprovedTeams();
 
     List<Team> findByStatus(com.abdisalam.efleague.modal.Team.Status status);
+
+
+
 }

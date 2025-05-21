@@ -115,17 +115,13 @@
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div class="container flex h-16 items-center justify-between">
         <a href="/" class="flex items-center gap-2 text-2xl font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
-                <path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path>
-                <path d="M12 12 2.1 9.1a10 10 0 0 0 19.8 0L12 12Z"></path>
-                <path d="M12 12v10"></path>
-            </svg>
             <span>🏀 E&F League</span>
         </a>
         <nav class="hidden md:flex items-center gap-6">
             <a href="#about" class="text-sm font-medium transition-colors hover:text-primary">About Us</a>
             <a href="#fixtures" class="text-sm font-medium transition-colors hover:text-primary">Next Match</a>
             <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/teams" class="text-sm font-medium transition-colors hover:text-primary">Manage Teams</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/teams/myTeam" class="text-sm font-medium transition-colors hover:text-primary">My Team</a>
             <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/users/manage" class="text-sm font-medium transition-colors hover:text-primary">Manage Users</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/signup" class="text-sm font-medium transition-colors hover:text-primary">Sign Up</a>
             <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="text-sm font-medium transition-colors hover:text-primary">Login</a>

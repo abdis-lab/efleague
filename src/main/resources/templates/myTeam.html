@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Team | E&F League</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Glassmorphism and shapes */
+        .glass-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .shape-top { clip-path: polygon(0 0, 100% 0, 100% 30%, 0 100%); }
+        .shape-bottom { clip-path: polygon(0 70%, 100% 0, 100% 100%, 0 100%); }
+        /* 3D tilt */
+        .tilt { perspective: 1000px; }
+        .tilt-inner { transform-style: preserve-3d; transition: transform 0.5s ease; }
+        .tilt:hover .tilt-inner { transform: rotateY(10deg) rotateX(5deg); }
+        /* Animated gradient */
+        @keyframes gradientBG { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+        .gradient-bg { background: linear-gradient(45deg, #9333ea, #3b82f6, #10b981); background-size: 300% 300%; animation: gradientBG 8s ease infinite; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+<!-- Header with animated gradient shape -->
+<header class="relative z-50">
+    <div class="absolute inset-0 gradient-bg opacity-50 shape-top"></div>
+    <nav class="relative container mx-auto flex items-center justify-between p-6">
+        <a href="/landingPage" class="flex items-center space-x-2">
+            <span class="text-4xl animate-bounce">🏀</span>
+            <span class="text-2xl font-extrabold uppercase tracking-wide">E&F League</span>
+        </a>
+        <div class="space-x-6 hidden md:flex">
+            <a href="#about" class="hover:text-green-400 transition">About</a>
+            <a href="#fixtures" class="hover:text-green-400 transition">Fixtures</a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/teams/myTeam" class="hover:text-green-400 transition">My Team</a>
+            <a th:if="${!#authorization.expression('isAuthenticated()')}" href="/users/login" class="hover:text-green-400 transition">Login</a>
+        </div>
+        <button class="md:hidden text-3xl">☰</button>
+    </nav>
+</header>
+
+<!-- Hero Section -->
+<section class="relative flex-grow flex items-center justify-center text-center py-20">
+    <div class="absolute inset-0 gradient-bg opacity-80 shape-bottom"></div>
+    <div class="relative">
+        <h1 class="text-6xl font-black uppercase drop-shadow-xl mb-4">My Team</h1>
+        <p class="text-lg text-gray-200 tracking-wider">Your passion, your squad</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="container mx-auto space-y-12 px-4 py-8">
+
+    <!-- No Team Alert -->
+    <div th:if="${team == null}" class="max-w-lg mx-auto glass-card p-8 rounded-3xl border border-red-500 shadow-lg text-center">
+        <h2 class="text-4xl font-bold text-red-400 mb-2">Oops!</h2>
+        <p class="text-lg text-red-200 mb-6">You’re not on a team yet.</p>
+        <a href="/teams" class="inline-block px-8 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition uppercase">Browse Teams</a>
+    </div>
+
+    <!-- Team Overview Card -->
+    <div th:if="${team != null}" class="glass-card rounded-4xl overflow-hidden shadow-2xl">
+        <div class="flex flex-col md:flex-row">
+            <!-- Image / Shape -->
+            <div class="md:w-1/3 relative">
+                <div class="absolute inset-0 gradient-bg opacity-50"></div>
+                <img th:src="@{'/avatars/' + ${team.getCaptain().id} + '.png'}" alt="Captain" class="relative m-8 w-40 h-40 rounded-full ring-8 ring-green-400 mx-auto" />
+            </div>
+            <!-- Info -->
+            <div class="md:w-2/3 p-10">
+                <h2 class="text-5xl font-extrabold mb-4" th:text="${team.name}">Team Name</h2>
+                <p class="text-gray-300 italic" >Team motto or description goes here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players Roster Tilt Grid -->
+    <section th:if="${team != null}">
+        <h3 class="text-3xl font-bold mb-6">Players Roster</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div th:each="player : ${team.userPlayers}" class="tilt">
+                <div class="tilt-inner glass-card p-6 rounded-2xl shadow-lg hover:shadow-2xl">
+                    <div class="flex flex-col items-center">
+                        <img th:src="@{'/avatars/' + ${player.id} + '.png'}" class="w-24 h-24 rounded-full ring-4 ring-indigo-400 mb-4" />
+                        <p class="text-xl font-semibold mb-1" th:text="${player.username}">Player</p>
+                        <p class="text-sm uppercase text-gray-400 mb-4">Position: <span >G</span></p>
+                        <!-- Player Stat Profiles -->
+                        <div class="w-full grid grid-cols-3 gap-2 text-center text-gray-300">
+                            <div>
+                                <p class="text-sm">PPG</p>
+                                <p class="font-bold">0.0</p>
+                            </div>
+                            <div>
+                                <p class="text-sm">RPG</p>
+                                <p class="font-bold">0.0</p>
+                            </div>
+                            <div>
+                                <p class="text-sm">APG</p>
+                                <p class="font-bold">0.0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats & Next Matchup -->
+    <section th:if="${team != null}" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Wins Card -->
+        <div class="glass-card p-8 rounded-3xl shadow-xl hover:scale-105 transition transform">
+            <p class="text-sm uppercase tracking-wide text-green-300">Wins</p>
+            <p class="text-5xl font-black text-green-400 mt-2" th:text="${team.wins}">0</p>
+        </div>
+        <!-- Losses Card -->
+        <div class="glass-card p-8 rounded-3xl shadow-xl hover:scale-105 transition transform">
+            <p class="text-sm uppercase tracking-wide text-red-300">Losses</p>
+            <p class="text-5xl font-black text-red-400 mt-2" th:text="${team.losses}">0</p>
+        </div>
+        <!-- Next Matchup Card -->
+        <div class="glass-card p-8 rounded-3xl shadow-xl hover:scale-105 transition transform">
+            <p class="text-sm uppercase tracking-wide text-indigo-300">Next Matchup</p>
+            <div th:if="${nextMatchup != null}" class="mt-4 space-y-3">
+                <p class="text-xl font-bold">vs <span th:text="${nextMatchup.awayTeam.name}">Opponent</span></p>
+                <p class="flex items-center text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span th:text="${#temporals.format(nextMatchup.gameDateTime,'EEEE, MMM d')}">Date</span>
+                </p>
+                <p class="flex items-center text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/></svg>
+                    <span th:text="${#temporals.format(nextMatchup.gameDateTime,'hh:mm a')}">Time</span>
+                </p>
+            </div>
+            <p th:if="${nextMatchup == null}" class="italic text-gray-500 mt-4">No upcoming matches</p>
+        </div>
+    </section>
+
+    <!-- Recent Results -->
+    <section th:if="${team != null}" class="glass-card p-8 rounded-3xl shadow-xl">
+        <h4 class="text-xl font-bold mb-4">Recent Results</h4>
+        <ul class="space-y-3">
+            <li th:each="match : ${nextMatchup}"
+                class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+                <!-- Opponent & location -->
+                <div class="flex items-center space-x-2">
+        <span th:if="${nextMatchup.getHomeTeam().getId() == team.id}" class="text-sm text-gray-400">
+          vs <span th:text="${nextMatchup.getAwayTeam().getName()}"></span>
+        </span>
+                    <span th:if="${nextMatchup.awayTeam.id == team.id}" class="text-sm text-gray-400">
+          @ <span th:text="${nextMatchup.homeTeam.name}"></span>
+        </span>
+                    <time class="text-xs text-gray-500"
+                          th:text="${#temporals.format(nextMatchup.gameDateTime,'MMM d')}">
+                    </time>
+                </div>
+                <!-- Result badge -->
+                <span th:classappend="${nextMatchup.result == 'W'} ? 'bg-green-500' : 'bg-red-600'"
+                      class="px-3 py-1 rounded-full text-sm font-semibold">
+        <span th:text="${nextMatchup.result}"></span>
+        &nbsp;
+        <span th:text="${nextMatchup.getHomeTeamScore()} + '-' + ${nextMatchup.getAwayTeamScore()}"></span>
+      </span>
+            </li>
+        </ul>
+    </section>
+
+    <!-- League Standings -->
+    <section th:if="${team != null}" class="glass-card p-8 rounded-3xl shadow-xl overflow-x-auto">
+        <h4 class="text-xl font-bold mb-4">League Standings</h4>
+        <table class="w-full text-left text-white">
+            <thead>
+            <tr class="border-b border-gray-600">
+                <th class="pb-2">#</th>
+                <th class="pb-2">Team</th>
+                <th class="pb-2">W</th>
+                <th class="pb-2">L</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Static rows; swap out for real ${standings} when you add it -->
+            <tr class="bg-green-700/30">
+                <td class="py-2">1</td>
+                <td class="font-medium">Your Team</td>
+                <td>10</td>
+                <td>2</td>
+            </tr>
+            <tr class="bg-gray-800/50">
+                <td class="py-2">2</td>
+                <td>Rivals</td>
+                <td>9</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td class="py-2">3</td>
+                <td>Challengers</td>
+                <td>8</td>
+                <td>4</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-center py-6 mt-auto">
+    <p class="text-sm text-gray-500">&copy; 2025 E&F League. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
